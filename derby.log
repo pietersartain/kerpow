@@ -1,6 +1,6 @@
 ----------------------------------------------------------------
-2005-09-11 09:07:47.999 GMT:
- Booting Derby version IBM Corp. - Apache Derby - 10.0.2.0 - (30301): instance c013800d-0106-4470-b25f-0000002bc290
-on database directory /home/administrator/docs/javasrc/kjar/kerpowDB 
+2005-09-24 13:05:15.824 GMT:
+ Booting Derby version IBM Corp. - Apache Derby - 10.0.2.0 - (30301): instance c013800d-0106-883c-c5f2-0000002a0b88
+on database directory /home/administrator/docs/javasrc/kerpow-development/6-multiplugin/kerpowDB 
 
 Database Class Loader started - derby.database.classpath=''

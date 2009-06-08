@@ -20,7 +20,9 @@ public class kerpowgui implements ActionListener
 	public JTable table;
 	public static JLabel statusBar = new JLabel();
 	public static JPanel infoBar = new JPanel();
+	public static int infoBarStatus = 0;
 	public static JFrame frame = new JFrame("kerpow!");
+	private static JToggleButton toggleList;
 	
 	public kerpowgui() {
 		kerpowObjectManager = new kerpowObjectManager();
@@ -33,7 +35,7 @@ public class kerpowgui implements ActionListener
 		masterPane.setLayout(new BoxLayout(masterPane,BoxLayout.PAGE_AXIS));
 		
 		// Add the menu
-		masterPane.add(makeMenu());
+		//masterPane.add(makeMenu());
 
 		// Add the tabbed pane
 		masterPane.add(makeTabbedpane());
@@ -134,32 +136,18 @@ protected JComponent makeTabbedpane()
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setOpaque(true);
 
-	for (int x=0; x<kerpowObjectManager.plugins.getPlugins().size(); x++)
-	{
-		plugin myPlugin = (plugin)kerpowObjectManager.plugins.getPlugins().get(x);
-   		//tabbedPane.addTab(myPlugin.getPluginName(), null, myPlugin.getGui().makeGui(), "Does nothing");
+		for (int x=0; x < kerpowObjectManager.plugins.getPlugins().size(); x++)
+		{
+			plugin myPlugin = (plugin)kerpowObjectManager.plugins.getPlugins().get(x);
+			String myString = "";
 
-		String myString = "";
-		
-		try { myString = myPlugin.getPluginName(); }
-		catch (Throwable e) { System.out.println("Oh bugger:  " + e); }
+			try { myString = myPlugin.getPluginName(); }
+			catch (Throwable e) { System.out.println("Oh bugger:  " + e); }
 
-		tabbedPane.addTab(myPlugin.getPluginName(), null, myPlugin.getGui().makeGui(), "Does nothing");
-	}
-	/*
-        
-        JComponent panel2 = makeTextPanel("Panel #2");
-        tabbedPane.addTab("Tab 2", null, panel2,
-                          "Does twice as much nothing");
-        tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
+			tabbedPane.addTab(myPlugin.getPluginName(), null, myPlugin.getGui().makeGui(), "Does nothing");
+		}
 
-        JComponent panel3 = makeTextPanel("Panel #3");
-        tabbedPane.addTab("Tab 3", null, panel3,
-                          "Still does nothing");
-        tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
-	*/
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		
 		return tabbedPane;
 }
 
@@ -255,7 +243,7 @@ protected JComponent makeTabbedpane()
 	public static void updateStatusBar(String s)
 	{
 		statusBar.setText(" " + new Date().toString() + ": " + s);
-		statusBar.repaint();
+		//statusBar.repaint();
 	}
 	
 	private static void updateInfoBar(int s)
@@ -266,13 +254,21 @@ protected JComponent makeTabbedpane()
 		infoBar.setSize(new Dimension(4500,s));
 	}
 	
-	public static void addInfoBar(JComponent s, int a)
+	public static void addInfoBar(JComponent s, int a, JToggleButton e)
 	{
+		if (toggleList != e) {
+			if (toggleList != null) {
+				toggleList.setSelected(false);
+				clearInfoBar();
+			}
+			toggleList = e;
+		}
+
 		updateInfoBar(a);
 		infoBar.add(s);
 		
 		frame.pack();
-		infoBar.repaint();
+		//infoBar.repaint();
 	}
 	
 	public static void clearInfoBar()
@@ -280,7 +276,7 @@ protected JComponent makeTabbedpane()
 		updateInfoBar(0);
 		infoBar.removeAll();
 		frame.pack();
-		infoBar.repaint();
+		//infoBar.repaint();
 	}
 		
     public static void main(String[] args) {

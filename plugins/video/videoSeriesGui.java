@@ -1,4 +1,4 @@
-package plugins.music;
+package plugins.video;
 
 import com.kaear.cli.*;
 import com.kaear.common.*;
@@ -18,21 +18,20 @@ import java.util.Properties;
 import java.util.Vector;
 import java.io.File;
 import java.lang.Process;
+import java.sql.ResultSet;
 
-public class aliasGui implements guiPlugin, ActionListener
+public class videoSeriesGui implements ActionListener
 {
 
 	private int verbosityLevel = 0;
-	private int addmusic = 0;
-	private int addalias = 0;
-	private String searchBox = "Artist";
+	private String searchBox = "Name";
 	private JTextField textField;
-	public displayTableModel tableModel;
-	public JTable table;
+	public static displaySeriesTableModel tableModel;
+	public static JTable table;
 
-	public aliasGui()
+	public videoSeriesGui()
 	{
-		verbosityLevel = musicMain.verbosityLevel;
+		verbosityLevel = 2;
 	}
 
 	/**
@@ -47,27 +46,19 @@ public class aliasGui implements guiPlugin, ActionListener
 		pane.add(buildSeparator());
 
 		pane.add(buildSideButton("Show all","xfce-sound","SHOW_ALL"));
+		pane.add(buildSideButton("Unarchived","xfce-sound","UNARCHIVED"));
 
 		pane.add(buildSeparator());
 
 		pane.add(buildSearchBox());
 		pane.add(buildDropList());
-		pane.add(buildSideButton("Find","file-manager","FIND_MUSIC"));
+		pane.add(buildSideButton("Find","file-manager","FIND_FILM"));
 		
 		pane.add(buildSeparator());
 
-		//pane.add(buildSideButton("Add","gtk-add","ADD_MUSIC"));
-		pane.add(toggleButton("Add","gtk-add","ADD_MUSIC"));
-		pane.add(buildSideButton("Update","gtk-refresh","UPDATE_MUSIC"));
-
-		pane.add(buildSeparator());
+		pane.add(toggleButton("Add","gtk-add","ADD_FILM"));
+		pane.add(buildSideButton("Delete","gtk-delete","DELETE_FILM"));
 		
-		pane.add(buildSideButton("Show aliases","xfce4-menueditor","SHOW_ALIAS"));
-		pane.add(buildSideButton("Add alias","xfce4-menueditor","ADD_ALIAS"));
-
-		pane.add(buildSeparator());
-		
-
 		pane.setBorder(BorderFactory.createEmptyBorder(
                                         5, //top
                                         5, //left
@@ -78,9 +69,9 @@ public class aliasGui implements guiPlugin, ActionListener
 
 		// Right hand side
 		JPanel pane1 = new JPanel(new GridLayout(0,1));
-		tableModel = new displayTableModel(new musicList(new musicCommands(null,null).showDB()));
+		tableModel = new displaySeriesTableModel(new videoSeriesList(new videoCommands(null,null).showSeries()));
 		table = new JTable(tableModel);
-        table.setPreferredScrollableViewportSize(new Dimension(700, 70));
+		table.setPreferredScrollableViewportSize(new Dimension(700, 70));
 
         //Create the scroll pane and add the table to it.
         JScrollPane scrollPane = new JScrollPane(table);
@@ -116,7 +107,7 @@ public class aliasGui implements guiPlugin, ActionListener
 
 	private JComboBox buildDropList()
 	{
-		String[] dropNames = { "Artist", "Album", "Format", "Misc" };
+		String[] dropNames = { "Artist", "Album", "Format", "Disc" };
 		JComboBox dropList = new JComboBox(dropNames);
 		dropList.setSelectedIndex(0);
 		dropList.setMinimumSize(new Dimension(120,20));
@@ -160,7 +151,7 @@ public class aliasGui implements guiPlugin, ActionListener
 		toggleButton.setActionCommand(action);
 		return toggleButton;
 	}
-	
+
 // ******* This makes stuff happen on button clicks *********
     public void actionPerformed(ActionEvent e) 
 	{
@@ -168,76 +159,55 @@ public class aliasGui implements guiPlugin, ActionListener
         String description = null;
 
         // Handle each button.
-        if ("UPDATE_MUSIC".equals(cmd)) 
-		{
-	  		kerpowgui.updateStatusBar("Updating ... ");
-			Vector args = new Vector();
-			args.add(0,musicMain.mp.getMusicPath());
-			args.add(1,musicMain.mp.getExcludePath());
-			new musicCommands("updateDB",args);
-        } 
-		else if ("CHANGE_SEARCH".equals(cmd)) 
+        if ("CHANGE_SEARCH".equals(cmd)) 
 		{
 			JComboBox cb = (JComboBox)e.getSource();
 			searchBox = (String)cb.getSelectedItem();
-        }
-		else if ("FIND_MUSIC".equals(cmd) || "SEARCH_BOX".equals(cmd)) 
+        } 
+		else if ("FIND_SERIES".equals(cmd) || "SEARCH_BOX".equals(cmd)) 
 		{
 	  		kerpowgui.updateStatusBar("Searching ...");
-			//updateTable(new musicCommands(null,null).searchDB(searchBox,textField.getText()));
 			Vector args = new Vector();
 			args.add(0,searchBox);
 			args.add(1,textField.getText());
-			new musicCommands("searchDB",args);
+			//new musicCommands("searchDB",args);
         } 
 		else if ("SHOW_ALL".equals(cmd)) 
 		{
-			updateTable(new musicCommands(null,null).showDB());
+			updateTable(new videoCommands(null,null).showSeries());
         } 
-		else if ("ADD_MUSIC".equals(cmd)) 
+		else if ("ADD_SERIES".equals(cmd)) 
 		{
-			if (addmusic == 0 && addalias == 0)
+			/*
+			JToggleButton jtb = (JToggleButton)e.getSource();
+			if (jtb.isSelected())
 			{
-				//updateTable(new musicCommands(null,null).showDB());
-				addmusic = 1;
-				kerpowgui.addInfoBar(new addGui().makeGui(),100);
+				kerpowgui.addInfoBar(new addGui().makeGui(),100, (JToggleButton)e.getSource());
 			} else {
-				if (addalias == 1) {
-					kerpowgui.clearInfoBar();
-					addmusic = 1;
-					kerpowgui.addInfoBar(new addGui().makeGui(),100);
-				} else {						
-				addmusic = 0;
-				kerpowgui.clearInfoBar();
-				}
-			}
-		}
-		else if ("ADD_ALIAS".equals(cmd)) 
-		{
-			if (addalias == 0)
-			{
-				//updateTable(new musicCommands(null,null).showDB());
-				addalias = 1;
-				kerpowgui.addInfoBar(new addGui().makeGui(),100);
-			} else {
-				addalias = 0;
 				kerpowgui.clearInfoBar();
 			}
+			*/
 		}
-		else if ("SHOW_ALIAS".equals(cmd)) 
+		else if ("DELETE_SERIES".equals(cmd)) 
 		{
-	  		kerpowgui.updateStatusBar("Executing ...");
-			Vector args = new Vector();
-			args.add(0,"SELECT * FROM alias ORDER BY alias DESC");
-			new musicCommands("runSQL",args);
+			tableModel.deleteRow(table.getSelectedRow());
 		}
-		
-    }
+}
 
 // ************** This refreshes the table contents *****************
 	public void updateTable(String sqlstmt) {
-		table.setModel(new displayTableModel(new musicList(sqlstmt)));
+	
+	//System.out.println(sqlstmt + " : " + tableModel + " : " + table);
+	
+		tableModel.setData(new videoSeriesList(sqlstmt));
+
+		// Mess with the artist edit column
+		//setUpArtistList(table, table.getColumnModel().getColumn(1));
+
+		// Mess with the album edit column
+		//setUpAlbumList(table, table.getColumnModel().getColumn(2));
+
+		// Mess with the format edit column
+		//setUpFormatList(table, table.getColumnModel().getColumn(3));
 	}
-
-
 }

@@ -1,11 +1,7 @@
-package plugins.music;
-
-import plugins.music.music.*;
-import plugins.music.alias.*;
+package plugins.video;
 
 import com.kaear.common.*;
 import com.kaear.gui.*;
-import com.kaear.res.images;
 
 // The gui ...
 import javax.swing.*;
@@ -15,14 +11,15 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class musicGui implements guiPlugin
+public class videoMainGui implements guiPlugin
 {
 
 	private int verbosityLevel = 0;
 
-	public musicGui()
+	public videoMainGui()
 	{
-		verbosityLevel = musicMain.verbosityLevel;
+		//verbosityLevel = musicMain.verbosityLevel;
+		verbosityLevel = 2;
 	}
 
 	/**
@@ -33,8 +30,8 @@ public class musicGui implements guiPlugin
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setOpaque(true);
 		
-		tabbedPane.addTab("Music", null, new musicMainGui().makeGui(), null);
-		tabbedPane.addTab("Alias", null, new aliasMainGui().makeGui(), null);
+		tabbedPane.addTab("Films", null, new videoFilmsGui().makeGui(), null);
+		tabbedPane.addTab("Series", null, new videoSeriesGui().makeGui(), null);
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		
 		return tabbedPane;

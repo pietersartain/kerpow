@@ -1,4 +1,4 @@
-package plugins.alias;
+package plugins.music.alias;
 
 import com.kaear.common.*;
 

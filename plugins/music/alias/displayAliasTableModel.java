@@ -1,4 +1,4 @@
-package plugins.music;
+package plugins.music.alias;
 
 import com.kaear.common.*;
 import com.kaear.cli.*;
@@ -10,13 +10,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class displayMusicTableModel extends AbstractTableModel {
+public class displayAliasTableModel extends AbstractTableModel {
 	
 	    private boolean DEBUG = false;
 		private static Vector data;
         private String[] columnNames;
 		
-		public displayMusicTableModel(dataList buildList)
+		public displayAliasTableModel(dataList buildList)
 		{
 			//Pull in the information for whatever module is required.
 			columnNames = buildList.getColumnHeaders();
@@ -101,14 +101,16 @@ public class displayMusicTableModel extends AbstractTableModel {
             fireTableCellUpdated(row, col);
 			
 			// Given a name, fetch the ID
-			String newVal = getAnID((String)value,col);
+			String newVal = formatUpdate((String)value,col);
+			
+			//String newVal = "-1";
 			
 			if (newVal.equals("-1")) {
 				newVal = (String)value;
 			}
 			
 			// Updates the database to match
-			kerpowObjectManager.runDB.sqlRun("UPDATE music SET " + getName(col) + " = " + newVal + " WHERE id = " + myStrData[0],"Table edit failed: ");
+			kerpowObjectManager.runDB.sqlRun("UPDATE alias SET " + getName(col) + " = " + newVal + " WHERE id = " + myStrData[0],"Table edit failed: ");
 
             if (DEBUG) {
                 System.out.println("New value of data:");
@@ -124,55 +126,42 @@ public class displayMusicTableModel extends AbstractTableModel {
 			data.remove(row);
 			fireTableRowsDeleted(row,row);
 	
-			new musicCommands("deleteMusic",args);
+			new aliasCommands("deleteAlias",args);
 		}
-		
-		private String getAnID(String value, int s)
+
+
+		private String formatUpdate(String value, int s)
 		{
 			/**
 			 * Columns:
 			 *
 			 * 0 = ID
-			 * 1 = Artist
-			 * 2 = Album
-			 * 3 = Format
-			 * 4 = Misc
+			 * 1 = Master (int)
+			 * 2 = Alias (String)
 			 */
-			musicCommands mc = new musicCommands(null,null);
+			aliasCommands ac = new aliasCommands(null,null);
 			
-			if (s == 1) { return String.valueOf(mc.checkArtist(value)); }
-			else
-			if (s == 2) { return String.valueOf(mc.checkAlbum(value)); }
-			else
-			if (s == 3) { return String.valueOf(mc.checkFormat(value)); }
-			else
-			if (s == 4) { return "-1"; }
-			else
-			{ return ""; }
+			if (s == 1) { return String.valueOf(ac.getMasterID(value)); }
+			else 
+			if (s == 2) { return "'" + value + "'";}
+			else { return "-1"; }
 		}
-		
+	
 		private String getName(int s)
 		{
 			/**
 			 * Columns:
 			 *
 			 * 0 = ID
-			 * 1 = Artist
-			 * 2 = Album
-			 * 3 = Format
-			 * 4 = Misc
+			 * 1 = Master
+			 * 2 = Alias
 			 */
 
 			if (s == 0) { return "id"; }
 			else
-			if (s == 1) { return "artist"; }
+			if (s == 1) { return "master"; }
 			else
-			if (s == 2) { return "album"; }
-			else
-			if (s == 3) { return "format"; }
-			else
-			if (s == 4) { return "misc"; }
-			else
+			if (s == 2) { return "alias"; }
 			{ return ""; }
 		}
 

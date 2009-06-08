@@ -1,8 +1,9 @@
-package plugins.alias;
+package plugins.music.music;
 
 import com.kaear.cli.*;
 import com.kaear.common.*;
 import com.kaear.gui.*;
+import plugins.music.*;
 
 // Database SQL imports
 import java.sql.ResultSet;
@@ -12,7 +13,7 @@ import java.io.File;
 import java.util.Vector;
 import java.util.Date;
 
-public class aliasCommands implements Runnable
+public class musicCommands implements Runnable
 {
 
 	private int verbosityLevel = 0;
@@ -20,7 +21,7 @@ public class aliasCommands implements Runnable
 	private String cmd;
 	private Vector args;
 
-	public aliasCommands(String cmd, Vector args)
+	public musicCommands(String cmd, Vector args)
 	{
 		verbosityLevel = musicMain.verbosityLevel;
 		this.args = new Vector();
@@ -80,7 +81,7 @@ public class aliasCommands implements Runnable
 
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
              public void run() {
-				new musicMain().getGui().updateTable(showDB());
+				new musicMainGui().updateTable(showDB());
              }});
 		
 		kerpowgui.updateStatusBar("Update completed.");				
@@ -89,10 +90,10 @@ public class aliasCommands implements Runnable
 		} else if (cmd.equals("showDB")) {
 			showDB();
 		} else if (cmd.equals("searchDB")) {
-			
+
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
              public void run() {
-				new musicMain().getGui().updateTable(searchDB((String)args.get(0),(String)args.get(1)));
+				new musicMainGui().updateTable(searchDB((String)args.get(0),(String)args.get(1)));
              }});
 
 		kerpowgui.updateStatusBar("Search finished.");				
@@ -111,7 +112,7 @@ public class aliasCommands implements Runnable
 		
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-				new musicMain().getGui().updateTable((String)args.get(0));
+				new musicMainGui().updateTable((String)args.get(0));
             }});
 
 			kerpowgui.updateStatusBar("SQL query completed.");
@@ -122,10 +123,19 @@ public class aliasCommands implements Runnable
 
 			kerpowgui.updateStatusBar("Record deleted.");
 			
-		/*
-		} else if (cmd.equals("checkArtist")) {
-			addRecord((String)args.get(0),(String)args.get(1));
-		} else if (cmd.equals("checkAlbum")) {
+		
+		} else if (cmd.equals("cleanMusic")) {
+			
+			kerpowgui.updateStatusBar(cleanMusic() + " artist(s) removed.");
+			
+			javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+				new musicMainGui().updateTable(showDB());
+            }});
+
+			
+			
+		/*} else if (cmd.equals("checkAlbum")) {
 			addMusic((String)args.get(0),(String)args.get(1),(String)args.get(2),(String)args.get(3));
 		} else if (cmd.equals("checkMusic")) {
 			addMusic((String)args.get(0),(String)args.get(1),(String)args.get(2),(String)args.get(3));
@@ -146,13 +156,13 @@ public class aliasCommands implements Runnable
 		kerpowObjectManager.runDB.sqlMake("create table artist(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128))","'Artist' creation failed:");
 		
 		// Alias
-		kerpowObjectManager.runDB.sqlMake("create table alias(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128), artistid int)","'Alias' creation failed:");
+		kerpowObjectManager.runDB.sqlMake("create table alias(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, master int, alias varchar(128))","'Alias' creation failed:");
 
 		// Album	
 		kerpowObjectManager.runDB.sqlMake("create table album(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128))","'Album' creation failed:");
 		
 		// Music
-		kerpowObjectManager.runDB.sqlMake("create table music(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, artist int, album int, format int, misc int)","'Music' creation failed:");
+		kerpowObjectManager.runDB.sqlMake("create table music(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, artist int, album int, format int, disc int)","'Music' creation failed:");
 			
 		// Format
 		kerpowObjectManager.runDB.sqlMake("create table format(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128))","'Format' creation failed:");
@@ -194,29 +204,83 @@ public class aliasCommands implements Runnable
 	 */
 	protected String searchDB(String type, String value)
 	{
+		if (type.equals("Artist"))
+		{
+			return searchAlias(value);
+		}
+		else if (type.equals("Disc"))
+		{
+			return searchDisc(value);
+		} else {
+			int intVal = -1;
+			try { intVal = Integer.parseInt(value,10);
+			} catch (Throwable e) { new exhandle("Value is not a number, therefore must be a string: ", e, verbosityLevel); }
+			String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.disc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id";
+			if (intVal == -1) {
+				sqlstmt+=" WHERE " + type + ".name LIKE '%" + value.replaceAll("'","''") + "%'";
+			} else {
+				sqlstmt+=" WHERE " + type + ".id = " + intVal;
+			}
+
+			sqlstmt+=" ORDER BY artist.name";
+			return sqlstmt;
+		}
+	}
+	
+	private String searchDisc(String value)
+	{
 		int intVal = -1;
 		try { intVal = Integer.parseInt(value,10);
 		} catch (Throwable e) { new exhandle("Value is not a number, therefore must be a string: ", e, verbosityLevel); }
-		String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.misc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id";
-		if (intVal == -1) {
-			sqlstmt+=" WHERE " + type + ".name LIKE '%" + value.replaceAll("'","''") + "%' ";
-		} else {
-			sqlstmt+=" WHERE " + type + ".id = " + intVal;
-		}
-		sqlstmt+=" ORDER BY artist.name";
+		String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.disc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id WHERE music.disc = " + intVal;
 		return sqlstmt;
 	}
 
+	private  String searchAlias(String value)
+	{
+		int intVal = -1;
+		try { intVal = Integer.parseInt(value,10);
+		} catch (Throwable e) { new exhandle("Value is not a number, therefore must be a string: ", e, verbosityLevel); }
+		//String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.disc, alias.alias FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id JOIN alias ON artist.id = alias.master ";
+		String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.disc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id ";
+		
+		if (intVal == -1) {
+			//sqlstmt+="WHERE artist.name LIKE '%" + value.replaceAll("'","''") + "%' OR alias.alias LIKE '%" + value.replaceAll("'","''") + "%'";
+			
+			sqlstmt = "(" + sqlstmt;
+			sqlstmt+="WHERE artist.name LIKE '%" + value.replaceAll("'","''") + "%') ";
+			sqlstmt+="UNION ";
+			sqlstmt+="(SELECT music.id, artist.name, album.name, format.name, music.disc FROM music ";
+			sqlstmt+="JOIN artist ON music.artist = artist.id ";
+			sqlstmt+="JOIN alias ON music.artist = alias.master ";
+			sqlstmt+="JOIN format ON music.format = format.id ";
+			sqlstmt+="JOIN album ON music.album = album.id ";
+			sqlstmt+="WHERE alias.alias LIKE '%" + value.replaceAll("'","''") + "%')";
+		} else {
+			sqlstmt+="WHERE artist.id = " + intVal;
+			sqlstmt+=" ORDER BY artist.name";
+		}
+		return sqlstmt;
+	}
 
 	/**
 	 *   Show the whole music database; in SQL format.
 	 */
 	protected String showDB()
 	{
-		String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.misc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id ORDER BY artist.name DESC";
+		String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.disc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id ORDER BY artist.name DESC";
 		return sqlstmt;
 	}
 	
+	/**
+	 *   Show all unarchived artists; in SQL format.
+	 */
+	protected String showUnarchived()
+	{
+		String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.disc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id WHERE format.name = 'MP3' AND disc = 0 ORDER BY artist.name DESC";
+		return sqlstmt;
+	}
+
 	/**
 	 *   Add to table "type" the value of "value"
 	 */
@@ -229,10 +293,10 @@ public class aliasCommands implements Runnable
 	/**
 	 *   Add a record to the "music" table.
 	 */
-	protected void addMusic(String artist, String album, String format, String misc)
+	protected void addMusic(String artist, String album, String format, String disc)
 	{
 		int intVal = 0;
-		try { intVal = Integer.parseInt(misc,10);
+		try { intVal = Integer.parseInt(disc,10);
 		} catch (Throwable e) { new exhandle("Value is not a number, therefore must be a string: ", e, verbosityLevel); }
 		makeMusicCombo(checkAlbum(album),checkArtist(artist),checkFormat(format),intVal);
 	}
@@ -261,20 +325,59 @@ public class aliasCommands implements Runnable
 	/**
 	 *   Update a record in the music table with the corresponding values.
 	 */
-	protected void editMusic(String id, String artist, String album, String format, String misc)
+	protected void editMusic(String id, String artist, String album, String format, String disc)
 	{
 		int intVal = -1;
 		try { intVal = Integer.parseInt(id,10);
 		} catch (Throwable e) { new exhandle("Music ID is not a number: ", e, verbosityLevel); }
 		
 		int mVal = 0;
-		try { mVal = Integer.parseInt(misc,10);
-		} catch (Throwable e) { new exhandle("Misc value is not a number: ", e, verbosityLevel); }
+		try { mVal = Integer.parseInt(disc,10);
+		} catch (Throwable e) { new exhandle("disc value is not a number: ", e, verbosityLevel); }
 	
-		String sqlstmt = "UPDATE music SET artist = '" + checkArtist(artist) + "', album = '" + checkAlbum(album) + "', format = '" + checkFormat(format) + "', misc = " + misc + " WHERE id = " + intVal;
+		String sqlstmt = "UPDATE music SET artist = '" + checkArtist(artist) + "', album = '" + checkAlbum(album) + "', format = '" + checkFormat(format) + "', disc = " + disc + " WHERE id = " + intVal;
 		kerpowObjectManager.runDB.sqlRun(sqlstmt,"Failed to make music combo: ");
 	}
 
+	protected int cleanMusic()
+	{
+		Vector delList = new Vector();
+		int deleted = 0;
+		
+		try
+		{
+			// Get an artist list
+			ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT id FROM artist","Gone wrong, guv: ");
+			while (!rs.isLast())
+			{
+				rs.next();
+				delList.add(0,rs.getString(1));
+			}
+		}
+		catch (Throwable e) { new exhandle("cleanMusic failed: ", e, verbosityLevel); }
+
+				// For every artist ...
+				for (int x = 0; x < delList.size(); x++)
+				{		
+					try {
+						ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT count(artist) FROM music WHERE artist = " + delList.get(x),"Really wrong, guv: ");
+						rs.next();
+						
+						// Check it's use in music
+						if (rs.getInt(1) == 0)
+						{
+							// Delete if not used.
+							kerpowObjectManager.runDB.sqlRun("DELETE FROM artist WHERE id = " + delList.get(x),"Oh yeah, really really wrong: ");
+							deleted++;
+						}
+						
+						// Delete all aliases with that artist.
+						kerpowObjectManager.runDB.sqlRun("DELETE FROM alias WHERE master = " + delList.get(x),"Really wrong, guv: ");
+					}
+					catch (Throwable e) { new exhandle("cleanMusic failed: ", e, verbosityLevel); }
+				}
+		return deleted;
+	}
 	
 	/**
 	 *   Checks to see if an artist (drawn from the music/ path) exists in the table "artist".  If no:  artist gets added.
@@ -364,11 +467,11 @@ public class aliasCommands implements Runnable
 	}
 	
 	/**
-	 *   Adds a music combination (album/artist/format/misc) to the table "music".
+	 *   Adds a music combination (album/artist/format/disc) to the table "music".
 	 */
-	protected void makeMusicCombo(int album, int artist, int format, int misc)
+	protected void makeMusicCombo(int album, int artist, int format, int disc)
 	{
-		kerpowObjectManager.runDB.sqlRun("insert into music(artist, album, format, misc) values(" + artist + ", " + album + ", " + format + ", " + misc + ")","Failed to make music combo: ");
+		kerpowObjectManager.runDB.sqlRun("insert into music(artist, album, format, disc) values(" + artist + ", " + album + ", " + format + ", " + disc + ")","Failed to make music combo: ");
 	}
 
 	/**
@@ -391,11 +494,11 @@ public class aliasCommands implements Runnable
 		{
 			try
 			{
-				ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT artistid,name FROM alias WHERE name = '" + artist + "'"," ");
+				ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT master,alias FROM alias WHERE alias = '" + artist + "'"," ");
 				rs.next();
 				if (artist.equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); }
 			} 
-			catch (Throwable e) { new exhandle("checkArtist failed: ", e, verbosityLevel); }
+			catch (Throwable e) { new exhandle("checkArtist (alias) failed: ", e, verbosityLevel); }
 		}
 		return result;
 	}

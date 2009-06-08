@@ -1,6 +1,7 @@
 package plugins.music;
 
 import com.kaear.common.*;
+import plugins.music.music.*;
 
 public class musicMain implements plugin
 {

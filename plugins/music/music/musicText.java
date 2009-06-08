@@ -1,4 +1,6 @@
-package plugins.alias;
+package plugins.music.music;
+
+import plugins.music.*;
 
 import com.kaear.cli.*;
 import com.kaear.common.*;
@@ -17,13 +19,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class aliasText implements cliPlugin
+public class musicText implements cliPlugin
 {
 
 	private int verbosityLevel = 0;
 	private int[] columnWidths = new int[4];
 
-	public aliasText()
+	public musicText()
 	{
 		verbosityLevel = musicMain.verbosityLevel;
 		columnWidths = musicMain.mp.getColumns();
@@ -53,7 +55,7 @@ public class aliasText implements cliPlugin
 	/**
 	 *   The display function that shows all records according to sqlstmt:
 	 *
-	 *   dbID	artist		album		format	misc
+	 *   dbID	artist		album		format	disc
 	 */
 	private int displayDB(String sqlstmt)
 	{
@@ -282,7 +284,7 @@ public class aliasText implements cliPlugin
 		msg+="		format <format type | formatID>\n";
 		msg+="		alias <alias name | aliasID>\n\n";
 		msg+="  update	updates the archive from your local music directories.\n\n";
-		msg+="  add		music <artist> <album> <format> <misc>\n\n";
+		msg+="  add		music <artist> <album> <format> <disc>\n\n";
 		msg+="  home		return home\n\n";
 
 		System.out.println(msg);

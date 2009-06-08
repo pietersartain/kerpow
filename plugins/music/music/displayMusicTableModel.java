@@ -1,4 +1,4 @@
-package plugins.alias;
+package plugins.music.music;
 
 import com.kaear.common.*;
 import com.kaear.cli.*;
@@ -10,13 +10,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class displayAliasTableModel extends AbstractTableModel {
+public class displayMusicTableModel extends AbstractTableModel {
 	
 	    private boolean DEBUG = false;
 		private static Vector data;
         private String[] columnNames;
 		
-		public displayAliasTableModel(dataList buildList)
+		public displayMusicTableModel(dataList buildList)
 		{
 			//Pull in the information for whatever module is required.
 			columnNames = buildList.getColumnHeaders();
@@ -136,7 +136,7 @@ public class displayAliasTableModel extends AbstractTableModel {
 			 * 1 = Artist
 			 * 2 = Album
 			 * 3 = Format
-			 * 4 = Misc
+			 * 4 = Disc
 			 */
 			musicCommands mc = new musicCommands(null,null);
 			
@@ -160,7 +160,7 @@ public class displayAliasTableModel extends AbstractTableModel {
 			 * 1 = Artist
 			 * 2 = Album
 			 * 3 = Format
-			 * 4 = Misc
+			 * 4 = Disc
 			 */
 
 			if (s == 0) { return "id"; }
@@ -171,7 +171,7 @@ public class displayAliasTableModel extends AbstractTableModel {
 			else
 			if (s == 3) { return "format"; }
 			else
-			if (s == 4) { return "misc"; }
+			if (s == 4) { return "disc"; }
 			else
 			{ return ""; }
 		}

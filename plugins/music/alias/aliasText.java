@@ -1,4 +1,4 @@
-package plugins.music;
+package plugins.music.alias;
 
 import com.kaear.cli.*;
 import com.kaear.common.*;
@@ -17,13 +17,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class musicText implements cliPlugin
+public class aliasText implements cliPlugin
 {
 
 	private int verbosityLevel = 0;
 	private int[] columnWidths = new int[4];
 
-	public musicText()
+	public aliasText()
 	{
 		verbosityLevel = musicMain.verbosityLevel;
 		columnWidths = musicMain.mp.getColumns();

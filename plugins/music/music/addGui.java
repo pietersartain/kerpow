@@ -1,9 +1,12 @@
-package plugins.music;
+package plugins.music.music;
+
+import plugins.music.*;
 
 import com.kaear.cli.*;
 import com.kaear.common.*;
 import com.kaear.gui.*;
 import com.kaear.res.images;
+
 
 // The gui ...
 import javax.swing.*;
@@ -300,7 +303,8 @@ public class addGui implements ActionListener
 			
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-				new musicMain().getGui().updateTable(new musicCommands(null,null).showDB());
+				//new musicMain().getGui().updateTable(new musicCommands(null,null).showDB());
+				new musicMainGui().updateTable(new musicCommands(null,null).showDB());
             }});
 		
 			kerpowgui.updateStatusBar("Added \"" + album + "\" by " + artist + ".");				
