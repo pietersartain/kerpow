@@ -3,9 +3,7 @@ package plugins.music;
 import plugins.music.music.*;
 import plugins.music.alias.*;
 
-import com.kaear.common.*;
-import com.kaear.gui.*;
-import com.kaear.res.images;
+import com.kaear.interfaces.*;
 
 // The gui ...
 import javax.swing.*;
@@ -18,11 +16,8 @@ import java.util.*;
 public class musicGui implements guiPlugin
 {
 
-	private int verbosityLevel = 0;
-
 	public musicGui()
 	{
-		verbosityLevel = musicMain.verbosityLevel;
 	}
 
 	/**

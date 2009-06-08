@@ -2,7 +2,6 @@ package plugins.music.alias;
 
 import plugins.music.*;
 
-import com.kaear.cli.*;
 import com.kaear.common.*;
 import com.kaear.gui.*;
 
@@ -17,14 +16,12 @@ import java.util.Date;
 public class aliasCommands implements Runnable
 {
 
-	private int verbosityLevel = 0;
 	private int[] columnWidths = new int[4];
 	private String cmd;
 	private Vector args;
 
 	public aliasCommands(String cmd, Vector args)
 	{
-		verbosityLevel = musicMain.verbosityLevel;
 		this.args = new Vector();
 		this.args = args;
 		this.cmd = cmd;
@@ -58,28 +55,14 @@ public class aliasCommands implements Runnable
 		} else if (cmd.equals("deleteAlias")) {
 			kerpowObjectManager.runDB.sqlRun("DELETE FROM alias WHERE id = " + (String)args.get(0), "Delete from 'alias' failed: ");
 			kerpowgui.updateStatusBar("Record deleted.");
-			
-		/*} else if (cmd.equals("setMaster")) {
-			
-			System.out.println((String)args.get(0) + " : " + (String)args.get(1));
-			
-			setMaster((String)args.get(0),(String)args.get(1));
-			
-			javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-				new aliasMainGui().updateTable(showDB());
-            }});
-			kerpowgui.updateStatusBar("New master set.");*/
 		} else {
-			System.out.println("Not a recognised command, sorry.");
+			new exhandle("Not a recognised command, sorry.",null);
 		}
 	}
 
 	protected int checkAlias(String master, String aliasC)
 	{
-		//String master.this = master.replaceAll("'","''");
 		String alias = aliasC.replaceAll("'","''");
-		//System.out.println(artist);
 		int result = -1;
 		try
 		{
@@ -87,27 +70,15 @@ public class aliasCommands implements Runnable
 			rs.next();
 			if (master.equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); }
 		} 
-		catch (Throwable e) { new exhandle("checkAlias failed: ", e, verbosityLevel); }
+		catch (Throwable e) { new exhandle("checkAlias failed: ", e); }
 		
 		return result;
 	}
 	
-	/*
-	protected void setMaster(String newMaster, String oldMaster)
-	{
-		plugins.music.music.musicCommands mc = new plugins.music.music.musicCommands(null,null);
-		if (mc.checkArtist(newMaster) == -1) { mc.addRecord("artist",newMaster); }
-		String sqlstmt = "UPDATE alias SET master = " + mc.checkArtist(newMaster) + ", alias = '" + oldMaster + "' WHERE master = " + mc.checkArtist(oldMaster);
-		System.out.println(sqlstmt);
-		kerpowObjectManager.runDB.sqlRun(sqlstmt, "Set master failed: ");
-		
-	}
-	*/
-	
-	protected void addAlias(String master, String alias)
+	protected boolean addAlias(String master, String alias)
 	{		
 		String sqlstmt = "INSERT INTO alias(master,alias) VALUES(" + getMasterID(master) + ", '" + alias.replaceAll("'","''") + "')";
-		if (kerpowObjectManager.runDB.sqlRun(sqlstmt,null)) { System.out.println("Updated."); }
+		return kerpowObjectManager.runDB.sqlRun(sqlstmt,null);
 	}
 
 	/**
@@ -133,7 +104,7 @@ public class aliasCommands implements Runnable
 			rs.next();
 			if (artist.equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); }
 		} 
-		catch (Throwable e) { new exhandle("getMasterID failed: ", e, verbosityLevel); }
+		catch (Throwable e) { new exhandle("getMasterID failed: ", e); }
 		
 		return result;
 	}

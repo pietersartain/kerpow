@@ -1,4 +1,4 @@
-package com.kaear.common;
+package com.kaear.interfaces;
 
 public interface cliPlugin
 {

@@ -1,6 +1,5 @@
-package plugins.video;
-
-import com.kaear.cli.*;
+package plugins.video.films;
+import plugins.video.*;
 import com.kaear.common.*;
 import com.kaear.gui.*;
 import com.kaear.res.images;
@@ -22,8 +21,6 @@ import java.sql.ResultSet;
 
 public class videoFilmsGui implements ActionListener
 {
-
-	private int verbosityLevel = 0;
 	private String searchCombo;
 	private JTextField searchField = new JTextField();
 	public static displayFilmsTableModel tableModel;
@@ -31,7 +28,6 @@ public class videoFilmsGui implements ActionListener
 
 	public videoFilmsGui()
 	{
-		verbosityLevel = 2;
 	}
 
 	/**
@@ -43,7 +39,7 @@ public class videoFilmsGui implements ActionListener
 		JPanel pane = new JPanel();
 		pane.setLayout(new BoxLayout(pane,BoxLayout.PAGE_AXIS));
 		
-		videoGuiComponents vgc = new videoGuiComponents();
+		guiComponents vgc = new guiComponents();
 		
 		pane.add(vgc.buildSeparator());
 
@@ -64,6 +60,7 @@ public class videoFilmsGui implements ActionListener
 		pane.add(vgc.buildSeparator());
 
 		pane.add(vgc.toggleButton("Add","gtk-add","ADD_FILM",this,Component.LEFT_ALIGNMENT));
+		pane.add(vgc.buildButton("Clean","gtk-refresh","CLEAN_FILMS",this,Component.LEFT_ALIGNMENT));
 		pane.add(vgc.buildButton("Delete","gtk-delete","DELETE_FILM",this,Component.LEFT_ALIGNMENT));
 		
 		pane.setBorder(BorderFactory.createEmptyBorder(
@@ -79,6 +76,13 @@ public class videoFilmsGui implements ActionListener
 		tableModel = new displayFilmsTableModel(new videoFilmsList(new videoCommands(null,null).showFilms()));
 		table = new JTable(tableModel);
 		table.setPreferredScrollableViewportSize(new Dimension(700, 70));
+		
+		// Format
+		vgc.setUpTableField(table, table.getColumnModel().getColumn(3),"SELECT name FROM videoformat ORDER BY id ASC");
+		// Quality
+		vgc.setUpTableField(table, table.getColumnModel().getColumn(4),"SELECT name FROM quality ORDER BY id ASC");
+		// Classification
+		vgc.setUpTableField(table, table.getColumnModel().getColumn(6),"SELECT name FROM classification ORDER BY name ASC");
 
         //Create the scroll pane and add the table to it.
         JScrollPane scrollPane = new JScrollPane(table);
@@ -105,7 +109,6 @@ public class videoFilmsGui implements ActionListener
 		else if ("FIND_FILM".equals(cmd) || "SEARCH_BOX".equals(cmd)) 
 		{
 	  		kerpowgui.updateStatusBar("Searching ...");
-			//updateTable(new musicCommands(null,null).searchDB(searchBox,textField.getText()));
 			Vector args = new Vector();
 			args.add(0,searchField.getText());
 			args.add(1,searchCombo);
@@ -125,8 +128,16 @@ public class videoFilmsGui implements ActionListener
 				kerpowgui.clearInfoBar();
 			}
 		}
+		else if ("CLEAN_FILMS".equals(cmd)) 
+		{
+	  		kerpowgui.updateStatusBar("Cleaning films ...");
+			Vector args = new Vector();
+			args.add(0,"films");
+			new videoCommands("cleanRecords",args);
+		}
 		else if ("DELETE_FILM".equals(cmd)) 
 		{
+	  		kerpowgui.updateStatusBar("Deleting ...");
 			tableModel.deleteRow(table.getSelectedRow());
 		}
 }
@@ -137,14 +148,13 @@ public class videoFilmsGui implements ActionListener
 	//System.out.println(sqlstmt + " : " + tableModel + " : " + table);
 	
 		tableModel.setData(new videoFilmsList(sqlstmt));
+		guiComponents vgc = new guiComponents();
 
-		// Mess with the artist edit column
-		//setUpArtistList(table, table.getColumnModel().getColumn(1));
-
-		// Mess with the album edit column
-		//setUpAlbumList(table, table.getColumnModel().getColumn(2));
-
-		// Mess with the format edit column
-		//setUpFormatList(table, table.getColumnModel().getColumn(3));
+		// Format
+		vgc.setUpTableField(table, table.getColumnModel().getColumn(3),"SELECT name FROM videoformat ORDER BY id ASC");
+		// Quality
+		vgc.setUpTableField(table, table.getColumnModel().getColumn(4),"SELECT name FROM quality ORDER BY id ASC");
+		// Classification
+		vgc.setUpTableField(table, table.getColumnModel().getColumn(6),"SELECT name FROM classification ORDER BY name ASC");
 	}
 }

@@ -1,7 +1,7 @@
-package plugins.video;
+package plugins.minidisk;
 
 import com.kaear.common.*;
-import com.kaear.cli.*;
+import com.kaear.interfaces.*;
 import com.kaear.gui.*;
 
 import javax.swing.*;
@@ -10,13 +10,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class displayFilmsTableModel extends AbstractTableModel {
+public class displayTableModel extends AbstractTableModel {
 	
 	    private boolean DEBUG = false;
 		private static Vector data;
         private String[] columnNames;
 		
-		public displayFilmsTableModel(dataList buildList)
+		public displayTableModel(dataList buildList)
 		{
 			//Pull in the information for whatever module is required.
 			columnNames = buildList.getColumnHeaders();
@@ -83,18 +83,7 @@ public class displayFilmsTableModel extends AbstractTableModel {
                                    + value.getClass() + ")");
             }
 
-            //data[row][col] = value;
-			
 			String[] myStrData = (String[])data.elementAt(row);
-			
-			/*
-			for (int x=0; x < myStrData.length; x++)
-			{
-				if (x == col)
-				{
-					myStrData[x] = (String)value;
-				}
-			}*/
 			myStrData[col] = (String)value;
 			
 			data.setElementAt(myStrData,row);
@@ -102,15 +91,20 @@ public class displayFilmsTableModel extends AbstractTableModel {
 			// Updates the actual view of the JTable
             fireTableCellUpdated(row, col);
 			
-			// Given a name, fetch the ID
-			/*String newVal = getAnID((String)value,col);
+			String[] columnNames = new minidiskList("").getColumnHeaders();
+			String colName = columnNames[col];
 			
-			if (newVal.equals("-1")) {
-				newVal = (String)value;
+			String sqlstmt = "UPDATE minidisk SET " + colName + " = ";
+			
+			if (colName.equals("Number")) {
+				sqlstmt+= (String)value;
+			} else {
+				sqlstmt+= "'" + (String)value + "'";
 			}
-			*/
-			// Updates the database to match
-			//kerpowObjectManager.runDB.sqlRun("UPDATE music SET " + getName(col) + " = " + newVal + " WHERE id = " + myStrData[0],"Table edit failed: ");
+			
+			sqlstmt+= " WHERE id = " + myStrData[0];
+
+				kerpowObjectManager.runDB.sqlRun(sqlstmt,"Table edit failed: ");
 
             if (DEBUG) {
                 System.out.println("New value of data:");
@@ -122,63 +116,12 @@ public class displayFilmsTableModel extends AbstractTableModel {
 		{
 			Vector args = new Vector();
 			args.add(0,getValueAt(row,0));
-			
+
 			data.remove(row);
 			fireTableRowsDeleted(row,row);
 	
-			//new musicCommands("deleteMusic",args);
+			new minidiskCommands("deleteRecord",args);
 		}
-		
-		/*
-		private String getAnID(String value, int s)
-		{
-			/**
-			 * Columns:
-			 *
-			 * 0 = ID
-			 * 1 = Artist
-			 * 2 = Album
-			 * 3 = Format
-			 * 4 = Disc
-			 */
-		/*	musicCommands mc = new musicCommands(null,null);
-			
-			if (s == 1) { return String.valueOf(mc.checkArtist(value)); }
-			else
-			if (s == 2) { return String.valueOf(mc.checkAlbum(value)); }
-			else
-			if (s == 3) { return String.valueOf(mc.checkFormat(value)); }
-			else
-			if (s == 4) { return "-1"; }
-			else
-			{ return ""; }
-		}
-		
-		private String getName(int s)
-		{
-			/**
-			 * Columns:
-			 *
-			 * 0 = ID
-			 * 1 = Artist
-			 * 2 = Album
-			 * 3 = Format
-			 * 4 = Disc
-			 */
-
-		/*	if (s == 0) { return "id"; }
-			else
-			if (s == 1) { return "artist"; }
-			else
-			if (s == 2) { return "album"; }
-			else
-			if (s == 3) { return "format"; }
-			else
-			if (s == 4) { return "disc"; }
-			else
-			{ return ""; }
-		}
-		*/
 
         private void printDebugData() {
             int numRows = getRowCount();

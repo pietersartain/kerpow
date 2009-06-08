@@ -2,6 +2,7 @@ package plugins.music.alias;
 
 import com.kaear.gui.*;
 import com.kaear.common.*;
+import com.kaear.interfaces.*;
 
 // Database SQL imports
 import java.sql.Connection;
@@ -18,7 +19,6 @@ import java.lang.Process;
 public class aliasList implements dataList
 {
 
-	private int verbosityLevel = 0;
 	private String sqlstmt;
 	
 	public aliasList(String sqlstmt)
@@ -37,14 +37,14 @@ public class aliasList implements dataList
 			{
 				rs.next();
 				
-				String[] thisRow = new String[3];
-				for (int i = 0; i < 3; i++) {
+				String[] thisRow = new String[getColumnHeaders().length];
+				for (int i = 0; i < getColumnHeaders().length; i++) {
 					thisRow[i] = rs.getString(i+1);
 				}
 				
 				data.add(0,thisRow);
 			}
-		} catch (Throwable e) { new exhandle("aliasList.makeList() failed with: ", e, verbosityLevel); }
+		} catch (Throwable e) { new exhandle("aliasList.makeList() failed with: ", e); }
 		
 		return data;
 	}

@@ -1,4 +1,4 @@
-package com.kaear.common;
+package com.kaear.interfaces;
 
 import javax.swing.JComponent;
 //import java.awt.event.ActionEvent;

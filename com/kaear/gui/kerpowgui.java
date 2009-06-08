@@ -1,7 +1,7 @@
 package com.kaear.gui;
 
+import com.kaear.interfaces.*;
 import com.kaear.common.*;
-import com.kaear.cli.*;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -16,7 +16,6 @@ public class kerpowgui implements ActionListener
 
     private static String LOOKANDFEEL = "System";
 	public static kerpowObjectManager kerpowObjectManager;
-//	public displayTableModel tableModel;
 	public JTable table;
 	public static JLabel statusBar = new JLabel();
 	public static JPanel infoBar = new JPanel();
@@ -53,30 +52,30 @@ public class kerpowgui implements ActionListener
 	}
 
 // ************** JMenu *****************
-protected JComponent makeMenu()
-{		
-        JMenu fileMenu = new JMenu ("File");
-        	JMenuItem printItem = new JMenuItem ("Print");
-        	fileMenu.add (printItem);
-        	JMenuItem exitItem = new JMenuItem ("Exit");
-        	fileMenu.add (exitItem);
-		
-        JMenu helpMenu = new JMenu ("Help");
-        	JMenuItem contentsItem = new JMenuItem ("Contents");
-        	helpMenu.add (contentsItem);
-        	JMenuItem aboutItem = new JMenuItem ("About");
-        	helpMenu.add (aboutItem);
+	protected JComponent makeMenu()
+	{		
+        	JMenu fileMenu = new JMenu ("File");
+        		JMenuItem printItem = new JMenuItem ("Print");
+        		fileMenu.add (printItem);
+        		JMenuItem exitItem = new JMenuItem ("Exit");
+        		fileMenu.add (exitItem);
 
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.add(fileMenu);
-		menuBar.add(helpMenu);
-		
-		menuBar.setMinimumSize(new Dimension(100000,25));
-		menuBar.setPreferredSize(new Dimension(100000,25));
-		menuBar.setMaximumSize(new Dimension(Short.MAX_VALUE,25));
-		
-		return menuBar;
-}
+        	JMenu helpMenu = new JMenu ("Help");
+        		JMenuItem contentsItem = new JMenuItem ("Contents");
+        		helpMenu.add (contentsItem);
+        		JMenuItem aboutItem = new JMenuItem ("About");
+        		helpMenu.add (aboutItem);
+
+			JMenuBar menuBar = new JMenuBar();
+			menuBar.add(fileMenu);
+			menuBar.add(helpMenu);
+
+			menuBar.setMinimumSize(new Dimension(100000,25));
+			menuBar.setPreferredSize(new Dimension(100000,25));
+			menuBar.setMaximumSize(new Dimension(Short.MAX_VALUE,25));
+
+			return menuBar;
+	}
 
 
 // ******* This makes stuff happen on button clicks *********
@@ -91,65 +90,52 @@ protected JComponent makeMenu()
     }
 
 // *************** InfoBar *******************
-protected JComponent makeInfoBar()
-{
-		infoBar.setPreferredSize(new Dimension(4500,0));
-		infoBar.setMinimumSize(new Dimension(4500,0));
-		infoBar.setMaximumSize(new Dimension(Short.MAX_VALUE,100));
-		infoBar.setSize(new Dimension(4500,0));
-		
-		//infoBar.setAlignmentX(Component.CENTER_ALIGNMENT);
-		
-		//infoBar.setHorizontalAlignment(SwingConstants.LEFT);
-		infoBar.setOpaque(true);
-		//statusBar.setBackground(Color.WHITE);
-		infoBar.setBorder(new BevelBorder(BevelBorder.LOWERED));
-		//statusBar.setText(" kerpow initialised.");
-		//updateStatusBar("kerpow initialised.");
-		
-		return infoBar;
-}
+	protected JComponent makeInfoBar()
+	{
+			infoBar.setPreferredSize(new Dimension(4500,0));
+			infoBar.setMinimumSize(new Dimension(4500,0));
+			infoBar.setMaximumSize(new Dimension(Short.MAX_VALUE,100));
+			infoBar.setSize(new Dimension(4500,0));
+			infoBar.setOpaque(true);
+			infoBar.setBorder(new BevelBorder(BevelBorder.LOWERED));
+			return infoBar;
+	}
 
 // ************** StatusBar *****************
-protected JComponent makeStatusbar()
-{
-		statusBar.setPreferredSize(new Dimension(4500,25));
-		statusBar.setMinimumSize(new Dimension(4500,25));
-		statusBar.setMaximumSize(new Dimension(Short.MAX_VALUE,25));
-		statusBar.setSize(new Dimension(4500,25));
-		
-		statusBar.setAlignmentX(Component.CENTER_ALIGNMENT);
-		
-		statusBar.setHorizontalAlignment(SwingConstants.LEFT);
-		statusBar.setOpaque(false);
-		//statusBar.setBackground(Color.WHITE);
-		statusBar.setBorder(new BevelBorder(BevelBorder.LOWERED));
-		//statusBar.setText(" kerpow initialised.");
-		updateStatusBar("kerpow initialised.");
-		
-		return statusBar;
-}
+	protected JComponent makeStatusbar()
+	{
+			statusBar.setPreferredSize(new Dimension(4500,25));
+			statusBar.setMinimumSize(new Dimension(4500,25));
+			statusBar.setMaximumSize(new Dimension(Short.MAX_VALUE,25));
+			statusBar.setSize(new Dimension(4500,25));
+			statusBar.setAlignmentX(Component.CENTER_ALIGNMENT);
+			statusBar.setHorizontalAlignment(SwingConstants.LEFT);
+			statusBar.setOpaque(false);
+			statusBar.setBorder(new BevelBorder(BevelBorder.LOWERED));
+			updateStatusBar("kerpow initialised.");
+			return statusBar;
+	}
 
 // ************** JTabbedPane *****************
-protected JComponent makeTabbedpane()
-{
-		JTabbedPane tabbedPane = new JTabbedPane();
-		tabbedPane.setOpaque(true);
+	protected JComponent makeTabbedpane()
+	{
+			JTabbedPane tabbedPane = new JTabbedPane();
+			tabbedPane.setOpaque(true);
 
-		for (int x=0; x < kerpowObjectManager.plugins.getPlugins().size(); x++)
-		{
-			plugin myPlugin = (plugin)kerpowObjectManager.plugins.getPlugins().get(x);
-			String myString = "";
+			for (int x=0; x < kerpowObjectManager.plugins.getPlugins().size(); x++)
+			{
+				plugin myPlugin = (plugin)kerpowObjectManager.plugins.getPlugins().get(x);
+				String myString = "";
 
-			try { myString = myPlugin.getPluginName(); }
-			catch (Throwable e) { System.out.println("Oh bugger:  " + e); }
+				try { myString = myPlugin.getPluginName(); }
+				catch (Throwable e) { new exhandle("Oh bugger:  ",e); }
 
-			tabbedPane.addTab(myPlugin.getPluginName(), null, myPlugin.getGui().makeGui(), "Does nothing");
-		}
+				tabbedPane.addTab(myPlugin.getPluginName(), null, myPlugin.getGui().makeGui(), "Does nothing");
+			}
 
-        tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		return tabbedPane;
-}
+        	tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
+			return tabbedPane;
+	}
 
 	
     protected JComponent makeTextPanel(String text) {
@@ -266,9 +252,7 @@ protected JComponent makeTabbedpane()
 
 		updateInfoBar(a);
 		infoBar.add(s);
-		
 		frame.pack();
-		//infoBar.repaint();
 	}
 	
 	public static void clearInfoBar()
@@ -276,18 +260,15 @@ protected JComponent makeTabbedpane()
 		updateInfoBar(0);
 		infoBar.removeAll();
 		frame.pack();
-		//infoBar.repaint();
 	}
 		
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
-		//initmain();
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 createAndShowGUI();
             }
         });
     }
-	
 }

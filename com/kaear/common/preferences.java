@@ -1,6 +1,5 @@
 package com.kaear.common;
 
-import com.kaear.cli.*;
 import com.kaear.gui.*;
 
 import java.io.*;
@@ -28,7 +27,7 @@ private int[] columnWidths = new int[5];
 				// Empty the preferences file into thePrefs
 				prefsRead.read(thePrefs);
 				
-			} catch (Throwable e) { new exhandle("Preference reading failed: ",e,2); }
+			} catch (Throwable e) { new exhandle("Preference reading failed: ",e); }
 			
 			// Tokenize thePrefs
 			String prefString = new String(thePrefs);
@@ -102,13 +101,13 @@ private int[] columnWidths = new int[5];
 			
 			if (verbosityLevel > 0)	{ showDebug(); } 
 
-		} catch (Throwable e) { new exhandle("Locate file failed: ",e,2);
+		} catch (Throwable e) { new exhandle("Locate file failed: ",e);
 		}
 	}
 	
 	private void showDebug()
 	{
-		System.out.println("\nVerbosity level: " + verbosityLevel);
+		new exhandle("Verbosity level: " + verbosityLevel, null);
 		
 /*		System.out.println("\nMusic paths:");
 		for (int x=0; x<musicpath.size(); x++)
@@ -128,7 +127,6 @@ private int[] columnWidths = new int[5];
 			System.out.print(columnWidths[x] + "  ");
 		}
 */
-		System.out.println("\n");
 	}
 	
 	public String[] getMusicPath()

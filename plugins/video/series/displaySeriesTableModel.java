@@ -1,5 +1,6 @@
-package plugins.music.music;
+package plugins.video.series;
 
+import plugins.video.*;
 import com.kaear.common.*;
 import com.kaear.interfaces.*;
 import com.kaear.gui.*;
@@ -9,14 +10,15 @@ import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.sql.ResultSet;
 
-public class displayMusicTableModel extends AbstractTableModel {
+public class displaySeriesTableModel extends AbstractTableModel {
 	
 	    private boolean DEBUG = false;
 		private static Vector data;
         private String[] columnNames;
 		
-		public displayMusicTableModel(dataList buildList)
+		public displaySeriesTableModel(dataList buildList)
 		{
 			//Pull in the information for whatever module is required.
 			columnNames = buildList.getColumnHeaders();
@@ -83,32 +85,52 @@ public class displayMusicTableModel extends AbstractTableModel {
                                    + value.getClass() + ")");
             }
 
-            //data[row][col] = value;
-			
-			String[] myStrData = (String[])data.elementAt(row);
-			
-			for (int x=0; x < myStrData.length; x++)
-			{
-				if (x == col)
-				{
-					myStrData[x] = (String)value;
-				}
-			}
+ 			String[] myStrData = (String[])data.elementAt(row);
+			myStrData[col] = (String)value;
 			
 			data.setElementAt(myStrData,row);
-			
+
 			// Updates the actual view of the JTable
             fireTableCellUpdated(row, col);
 			
 			// Given a name, fetch the ID
 			String newVal = getAnID((String)value,col);
 			
-			if (newVal.equals("-1")) {
-				newVal = (String)value;
-			}
+			String[] columnNames = new videoSeriesList("").getColumnHeaders();
+			String colName = columnNames[col];
 			
-			// Updates the database to match
-			kerpowObjectManager.runDB.sqlRun("UPDATE music SET " + getName(col) + " = " + newVal + " WHERE id = " + myStrData[0],"Table edit failed: ");
+			if (col == 0 || col > 3) {
+				// This is part of the video table, not series
+				if (newVal.equals("-1"))
+				{
+					try { int x = Integer.parseInt((String)value,10);
+							newVal = String.valueOf(x); }
+					catch (Throwable e) { newVal = "'" + (String)value + "'"; }
+				}
+				kerpowObjectManager.runDB.sqlRun("UPDATE video SET " + colName + " = " + newVal + " WHERE id = " + myStrData[0],"Table edit failed: ");
+			} else {
+				if (newVal.equals("-1"))
+				{
+					try { int x = Integer.parseInt((String)value,10);
+							newVal = String.valueOf(x); }
+					catch (Throwable e) { newVal = "'" + (String)value + "'"; }
+				}
+				videoCommands mc = new videoCommands(null,null);
+				//System.out.println(myStrData[1] + " : " + Integer.parseInt(myStrData[2]) + " : " + Integer.parseInt(myStrData[3]));
+				
+				int result = -1;
+				try {
+					ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT type_id FROM video WHERE type = " + mc.getID("series","type","name") + " AND id = " + myStrData[0],"type_id reclamation failed: ");
+					rs.next();
+					result = Integer.parseInt(rs.getString(1));
+				} 
+				catch (Throwable e) { new exhandle("type_ID failed: ", e); }
+				
+				kerpowObjectManager.runDB.sqlRun("UPDATE series SET " + colName + " = " + newVal + " WHERE id = " + result,"Table edit failed: ");
+				int id = mc.getSeriesID(myStrData[1],Integer.parseInt(myStrData[2]),Integer.parseInt(myStrData[3]));
+				kerpowObjectManager.runDB.sqlRun("UPDATE video SET type_id = " + id + " WHERE id = " + myStrData[0],"Table edit failed: ");
+			}
+
 
             if (DEBUG) {
                 System.out.println("New value of data:");
@@ -120,11 +142,12 @@ public class displayMusicTableModel extends AbstractTableModel {
 		{
 			Vector args = new Vector();
 			args.add(0,getValueAt(row,0));
+			args.add(1,"series");
 			
 			data.remove(row);
 			fireTableRowsDeleted(row,row);
 	
-			new musicCommands("deleteMusic",args);
+			new videoCommands("deleteRecord",args);
 		}
 		
 		private String getAnID(String value, int s)
@@ -133,47 +156,24 @@ public class displayMusicTableModel extends AbstractTableModel {
 			 * Columns:
 			 *
 			 * 0 = ID
-			 * 1 = Artist
-			 * 2 = Album
-			 * 3 = Format
-			 * 4 = Disc
+			 * 1 = Name
+			 * 2 = Season
+			 * 3 = Episodes
+			 * 4 = Disks
+			 * 5 = Format
+			 * 6 = Quality
+			 * 7 = Location
+			 * 8 = Classification
 			 */
-			musicCommands mc = new musicCommands(null,null);
+			videoCommands mc = new videoCommands(null,null);
 			
-			if (s == 1) { return String.valueOf(mc.checkArtist(value)); }
+			if (s == 5) { return String.valueOf(mc.getID(value,"videoformat","name")); }
 			else
-			if (s == 2) { return String.valueOf(mc.checkAlbum(value)); }
+			if (s == 6) { return String.valueOf(mc.getID(value,"quality","name")); }
 			else
-			if (s == 3) { return String.valueOf(mc.checkFormat(value)); }
+			if (s == 8) { return String.valueOf(mc.getID(value,"classification","name")); }
 			else
-			if (s == 4) { return "-1"; }
-			else
-			{ return ""; }
-		}
-		
-		private String getName(int s)
-		{
-			/**
-			 * Columns:
-			 *
-			 * 0 = ID
-			 * 1 = Artist
-			 * 2 = Album
-			 * 3 = Format
-			 * 4 = Disc
-			 */
-
-			if (s == 0) { return "id"; }
-			else
-			if (s == 1) { return "artist"; }
-			else
-			if (s == 2) { return "album"; }
-			else
-			if (s == 3) { return "format"; }
-			else
-			if (s == 4) { return "disc"; }
-			else
-			{ return ""; }
+			{ return "-1"; }
 		}
 
         private void printDebugData() {

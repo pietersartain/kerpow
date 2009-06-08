@@ -14,7 +14,7 @@ public class images
 	{
 		ImageIcon myIcon = null;
 		try { myIcon = new ImageIcon(ClassLoader.getSystemResource("com/kaear/res/" + myImage + ".png"));}
-		catch (Throwable e) { new exhandle("Icon creation failed: ", e, 1); }
+		catch (Throwable e) { new exhandle("Icon creation failed: ", e); }
 		return myIcon;
 	}
 }

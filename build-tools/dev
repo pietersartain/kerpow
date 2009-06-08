@@ -66,15 +66,35 @@ echo "Building music.jar ..."
 	cd ../
 	rm kerpow/plugins/music/ -dr
 	
-#echo "Building alias.jar ..."
-#	cp -a ../plugins/alias kerpow/plugins/
+echo "Building video.jar ..."
+	cp -a ../plugins/video kerpow/plugins/
+#	rm `find -name \*.java`
+	find -name \*.java
+	cd kerpow/
+	jar cmf ../res/plugins-manifest.txt video.jar plugins/video/
+	mv video.jar plugins/
+	cd ../
+	rm kerpow/plugins/video/ -dr
+
+echo "Building minidisk.jar ..."
+	cp -a ../plugins/minidisk kerpow/plugins/
+#	rm `find -name \*.java`
+	find -name \*.java
+	cd kerpow/
+	jar cmf ../res/plugins-manifest.txt minidisk.jar plugins/minidisk/
+	mv minidisk.jar plugins/
+	cd ../
+	rm kerpow/plugins/minidisk/ -dr
+
+#echo "Building minidisk.jar ..."
+#	cp -a ../plugins/minidisk kerpow/plugins/
 ##	rm `find -name \*.java`
 #	find -name \*.java
 #	cd kerpow/
-#	jar cmf ../res/plugins-manifest.txt alias.jar plugins/alias/
-#	mv alias.jar plugins/
+#	jar cmf ../res/plugins-manifest.txt minidisk.jar plugins/minidisk/
+#	mv minidisk.jar plugins/
 #	cd ../
-#	rm kerpow/plugins/music/ -dr
+#	rm kerpow/plugins/minidisk/ -dr
 
 echo "Building kerpow-all.tar.bz2 ..."
 	tar -cf kerpow-all.tar kerpow

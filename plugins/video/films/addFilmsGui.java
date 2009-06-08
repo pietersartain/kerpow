@@ -1,6 +1,7 @@
-package plugins.video;
+package plugins.video.films;
 
-import com.kaear.cli.*;
+import plugins.video.*;
+import com.kaear.interfaces.*;
 import com.kaear.common.*;
 import com.kaear.gui.*;
 import com.kaear.res.images;
@@ -23,8 +24,6 @@ import java.sql.ResultSet;
 
 public class addFilmsGui implements ActionListener
 {
-
-	private int verbosityLevel = 0;
 	private String qualityBox = new String();
 	private String formatBox = new String();
 	private String classificationBox = new String();
@@ -34,7 +33,6 @@ public class addFilmsGui implements ActionListener
 
 	public addFilmsGui()
 	{
-		verbosityLevel = videoMain.verbosityLevel;
 	}
 
 	/**
@@ -46,7 +44,7 @@ public class addFilmsGui implements ActionListener
 		pane.setLayout(new GridBagLayout());
 
 		GridBagConstraints c = new GridBagConstraints();
-		videoGuiComponents vgc = new videoGuiComponents();
+		guiComponents vgc = new guiComponents();
 		
 		c.ipadx = 5;
 		c.ipady = 2;
@@ -54,6 +52,8 @@ public class addFilmsGui implements ActionListener
 		c.weightx = 0.5;
 		c.weighty =  0.5;
 
+		c.anchor = GridBagConstraints.LINE_START;
+		c.insets = new Insets(0,10,0,0);
 // *******************************************		
 		c.gridx = 0;
 		c.gridy = 0;
@@ -73,16 +73,18 @@ public class addFilmsGui implements ActionListener
 
 		c.gridx = 1;
 		c.gridy = 1;
-		JComboBox cb = vgc.makeCombo(null, "SELECT name FROM videoformat ORDER BY id ASC",1,"CHANGE_FORMAT",this,Component.CENTER_ALIGNMENT);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		JComboBox cb = vgc.makeCombo(null, "SELECT name FROM videoformat ORDER BY id ASC",1,"CHANGE_FORMAT",this,Component.LEFT_ALIGNMENT);
 		pane.add(cb,c);
 		formatBox = (String)cb.getSelectedItem();
 
 		c.gridx = 1;
 		c.gridy = 2;
-		cb = vgc.makeCombo(null, "SELECT name FROM quality ORDER BY id ASC",1,"CHANGE_QUALITY",this,Component.CENTER_ALIGNMENT);
+		cb = vgc.makeCombo(null, "SELECT name FROM quality ORDER BY id ASC",1,"CHANGE_QUALITY",this,Component.LEFT_ALIGNMENT);
 		pane.add(cb,c);
 		qualityBox = (String)cb.getSelectedItem();
 // *******************************************
+		c.fill = GridBagConstraints.NONE;
 		c.gridx = 2;
 		c.gridy = 0;
 		pane.add(new JLabel("Disks: "),c);
@@ -106,12 +108,14 @@ public class addFilmsGui implements ActionListener
 
 		c.gridx = 3;
 		c.gridy = 2;
-		cb = vgc.makeCombo(null, "SELECT name FROM classification ORDER BY id ASC",1,"CHANGE_CLASSIFICATION",this,Component.CENTER_ALIGNMENT);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		cb = vgc.makeCombo(null, "SELECT name FROM classification ORDER BY id ASC",1,"CHANGE_CLASSIFICATION",this,Component.LEFT_ALIGNMENT);
 		pane.add(cb,c);
 		classificationBox = (String)cb.getSelectedItem();
 // *******************************************
-		c.gridx = 3;
-		c.gridy = 3;
+		c.gridx = 4;
+		c.gridy = 2;
+		c.fill = GridBagConstraints.NONE;
 		pane.add(vgc.buildButton("Add","gtk-add","ADD_FILM_REC",this,Component.CENTER_ALIGNMENT),c);
 
 

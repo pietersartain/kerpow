@@ -2,7 +2,6 @@ package plugins.music.alias;
 
 import plugins.music.*;
 
-import com.kaear.cli.*;
 import com.kaear.common.*;
 import com.kaear.gui.*;
 import com.kaear.res.images;
@@ -24,14 +23,11 @@ import java.sql.ResultSet;
 
 public class addAliasGui implements ActionListener
 {
-
-	private int verbosityLevel = 0;
-	private String artistBox = "";
-	private JTextField newAlias;
+	private String artistBox;
+	private JTextField newAlias = new JTextField();
 
 	public addAliasGui()
 	{
-		verbosityLevel = musicMain.verbosityLevel;
 	}
 
 	/**
@@ -40,10 +36,11 @@ public class addAliasGui implements ActionListener
 	public JComponent makeGui()
 	{
 		JPanel pane = new JPanel();
-		//pane.setLayout(new GridLayout(0,3,5,5));
 		pane.setLayout(new GridBagLayout());
 
 		GridBagConstraints c = new GridBagConstraints();
+		
+		guiComponents gc = new guiComponents();
 		
 		c.ipadx = 5;
 		c.ipady = 2;
@@ -64,18 +61,18 @@ public class addAliasGui implements ActionListener
 		c.gridx = 1;
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.WEST;
-		pane.add(artistBox(),c);
+		JComboBox cb = gc.makeCombo(" -Artist- ","SELECT name FROM artist ORDER BY name DESC",1,"ARTIST_BOX",this,Component.CENTER_ALIGNMENT);
+		pane.add(cb,c);
+		artistBox = (String)cb.getSelectedItem();
 
 		c.gridx = 1;
 		c.gridy = 1;
-		pane.add(aliasText(),c);
-
+		pane.add(gc.makeText(newAlias,"ALIAS_NAME",this,Component.CENTER_ALIGNMENT),c);
 // *******************************************
 
 		c.gridx = 2;
 		c.gridy = 2;
-		pane.add(buildButton("Add","gtk-add","ADD_ALIAS"),c);
-
+		pane.add(gc.buildButton("Add","gtk-add","ADD_ALIAS",this,Component.CENTER_ALIGNMENT),c);
 
 		pane.setBorder(BorderFactory.createEmptyBorder(
                                         5, //top
@@ -84,63 +81,6 @@ public class addAliasGui implements ActionListener
                                         5) //right
                                         );
 		return pane;
-	}
-
-	private JComboBox artistBox()
-	{
-		JComboBox dropList = new JComboBox();
-		
-		dropList.addItem(" -Artist- ");
-		
-		try {
-			ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT * FROM artist ORDER BY name DESC","Artist listing failed: ");
-			
-			if (rs == null)
-				System.out.println("I'm null, mummy!");
-			
-			while (!rs.isLast())
-			{
-				rs.next();
-				//dropNames.add(0,rs.getString(2));
-				dropList.addItem(rs.getString(2));
-			}
-		} catch (Throwable e) { new exhandle("addGui.artistBox() failed with: ", e, verbosityLevel); }
-
-		dropList.setSelectedIndex(0);
-		dropList.setMinimumSize(new Dimension(120,20));
-		dropList.setPreferredSize(new Dimension(120,20));
-		dropList.setMaximumSize(new Dimension(120,20));
-		dropList.addActionListener(this);
-		dropList.setActionCommand("ARTIST_BOX");
-		return dropList;
-	}
-
-	private JTextField aliasText()
-	{
-		newAlias = new JTextField(20);
-		newAlias.setMinimumSize(new Dimension(120,20));
-		newAlias.setPreferredSize(new Dimension(120,20));
-		newAlias.setMaximumSize(new Dimension(120,20));
-		newAlias.addActionListener(this);
-		newAlias.setActionCommand("ALIAS_NAME");
-		return newAlias;
-	}
-
-	/**
-	 *  Helper function to build side buttons.
-	 */
-	private JButton buildButton(String name, String image, String action)
-	{
-		ImageIcon myIcon = null;
-		if (image != null) { myIcon = new images().makeImage(image); }
-		
-		JButton sideButton = new JButton(name, myIcon);
-		sideButton.setMinimumSize(new Dimension(100,24));
-		sideButton.setPreferredSize(new Dimension(100,24));
-		sideButton.setMaximumSize(new Dimension(100,24));
-		sideButton.addActionListener(this);
-		sideButton.setActionCommand(action);
-		return sideButton;
 	}
 
 	// ******* This makes stuff happen on button clicks *********

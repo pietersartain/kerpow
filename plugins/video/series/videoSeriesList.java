@@ -1,4 +1,4 @@
-package plugins.music.music;
+package plugins.video.series;
 
 import com.kaear.gui.*;
 import com.kaear.common.*;
@@ -16,11 +16,11 @@ import java.util.*;
 import java.io.File;
 import java.lang.Process;
 
-public class musicList implements dataList
+public class videoSeriesList implements dataList
 {
 	private String sqlstmt;
 	
-	public musicList(String sqlstmt)
+	public videoSeriesList(String sqlstmt)
 	{
 		this.sqlstmt = sqlstmt;
 	}
@@ -44,13 +44,13 @@ public class musicList implements dataList
 				
 				data.add(0,thisRow);
 			}
-		} catch (Throwable e) { new exhandle("musicList.makeList() failed with: ", e); }
+		} catch (Throwable e) { new exhandle("videoSeriesList.makeList() failed with: ", e); }
 		
 		return data;
 	}
 	
 	public String[] getColumnHeaders()
 	{
-		return new String[] {"ID","Artist","Album","Format","Disc"};
+		return new String[] {"ID","Name","Season","Episodes","Disks","Format","Quality","Location","Classification"};
 	}
 }

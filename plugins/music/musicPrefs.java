@@ -27,7 +27,7 @@ private int[] columnWidths = new int[5];
 				// Empty the preferences file into thePrefs
 				prefsRead.read(thePrefs);
 				
-			} catch (Throwable e) { new exhandle("Preference reading failed: ",e,2); }
+			} catch (Throwable e) { new exhandle("Preference reading failed: ",e); }
 			
 			// Tokenize thePrefs
 			String prefString = new String(thePrefs);
@@ -101,7 +101,7 @@ private int[] columnWidths = new int[5];
 			
 			if (verbosityLevel > 0)	{ showDebug(); } 
 
-		} catch (Throwable e) { new exhandle("Locate file failed: ",e,2);
+		} catch (Throwable e) { new exhandle("Locate file failed: ",e);
 		}
 	}
 	

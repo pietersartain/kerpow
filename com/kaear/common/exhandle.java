@@ -1,12 +1,13 @@
 package com.kaear.common;
 
-import com.kaear.cli.*;
 import com.kaear.gui.*;
 
 public class exhandle
 {
 
-	public exhandle(String message, Throwable e, int verbosityLevel)
+	private int verbosityLevel = kerpowObjectManager.verbosityLevel;
+
+	public exhandle(String message, Throwable e)
 	{
 		int flag = 0;
 		String eX = "";

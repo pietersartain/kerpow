@@ -1,5 +1,6 @@
 package plugins.video;
 
+import com.kaear.interfaces.*;
 import com.kaear.common.*;
 import com.kaear.gui.*;
 
@@ -14,12 +15,8 @@ import java.util.*;
 public class videoMainGui implements guiPlugin
 {
 
-	private int verbosityLevel = 0;
-
 	public videoMainGui()
 	{
-		//verbosityLevel = musicMain.verbosityLevel;
-		verbosityLevel = 2;
 	}
 
 	/**
@@ -30,8 +27,8 @@ public class videoMainGui implements guiPlugin
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setOpaque(true);
 		
-		tabbedPane.addTab("Films", null, new videoFilmsGui().makeGui(), null);
-		tabbedPane.addTab("Series", null, new videoSeriesGui().makeGui(), null);
+		tabbedPane.addTab("Films", null, new plugins.video.films.videoFilmsGui().makeGui(), null);
+		tabbedPane.addTab("Series", null, new plugins.video.series.videoSeriesGui().makeGui(), null);
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		
 		return tabbedPane;

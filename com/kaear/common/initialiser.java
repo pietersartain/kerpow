@@ -1,5 +1,6 @@
 package com.kaear.common;
 
+import com.kaear.interfaces.*;
 import java.io.File;
 
 
@@ -18,9 +19,8 @@ public class initialiser
 		// We haven't been run before, so let's do some stuff ...
 		
 		// provide some information for the user to read
-		System.out.println("kerpow has detected it has not been run before.");
-		System.out.println("Creating & populating tables ...\n");
-		
+		new exhandle("kerpow has detected it has not been run before.\nCreating & populating tables ...\n",null);
+
 		// Do the shiznit.
 		makeRun();
 		
@@ -39,6 +39,6 @@ public class initialiser
 			new File(".status").mkdir();
 			new File(".status/run.once").createNewFile();
 		}
-		catch (Throwable e) { new exhandle("Cannot create file run.once! ",e,2); }
+		catch (Throwable e) { new exhandle("Cannot create file run.once! ",e); }
 	}
 }

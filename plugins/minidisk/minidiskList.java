@@ -1,5 +1,6 @@
-package plugins.video;
+package plugins.minidisk;
 
+import com.kaear.interfaces.*;
 import com.kaear.gui.*;
 import com.kaear.common.*;
 
@@ -15,13 +16,13 @@ import java.util.*;
 import java.io.File;
 import java.lang.Process;
 
-public class videoFilmsList implements dataList
+public class minidiskList implements dataList
 {
 
 	private int verbosityLevel = 0;
 	private String sqlstmt;
 	
-	public videoFilmsList(String sqlstmt)
+	public minidiskList(String sqlstmt)
 	{
 		this.sqlstmt = sqlstmt;
 	}
@@ -38,20 +39,20 @@ public class videoFilmsList implements dataList
 			{
 				rs.next();
 				
-				String[] thisRow = new String[7];
-				for (int i = 0; i < 7; i++) {
+				String[] thisRow = new String[getColumnHeaders().length];
+				for (int i = 0; i < getColumnHeaders().length; i++) {
 					thisRow[i] = rs.getString(i+1);
 				}
 				
 				data.add(0,thisRow);
 			}
-		} catch (Throwable e) { new exhandle("videoFilmsList.makeList() failed with: ", e, verbosityLevel); }
+		} catch (Throwable e) { new exhandle("videoFilmsList.makeList() failed with: ", e); }
 		
 		return data;
 	}
 	
 	public String[] getColumnHeaders()
 	{
-		return new String[] {"ID","Name","Discs","Format","Quality","Location","Classification"};
+		return new String[] {"ID","Name","Number","Contents"};
 	}
 }

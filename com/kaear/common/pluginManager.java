@@ -1,5 +1,7 @@
 package com.kaear.common;
 
+import com.kaear.interfaces.*;
+
 import java.util.Vector;
 import java.lang.Class.*;
 import java.lang.Object.*;
@@ -33,25 +35,26 @@ public class pluginManager
 			// For each subdir ...
 			for (int i=0; i<children.length; i++) 
 			{
-				// If it is a directory itself ...
-				/*
-				if (new File(dir, children[i]).isDirectory())
-				{
-					// Must be a plugin, add it to the list.
-					pluginList.add(0,"plugins." + children[i].toString() + "." + children[i].toString() + "Main");
-				}
-				*/
-				
+				// if it's a file ...
 				if (new File(dir, children[i]).isFile())
 				{
 
+					// if it ends with ".jar" ...
 					if (children[i].toString().endsWith(".jar"))
 					{
 						int linelen = children[i].toString().indexOf(".");
 						String tempPlugin = children[i].toString().substring(0,linelen);
-			
-						//System.out.println(tempPlugin);
-
+						
+						// Get the existing classpath:
+						//String curCP = System.getProperty("java.class.path");
+						
+						//System.out.println(curCP);
+						
+						// Add it to the classpath:
+						//System.setProperty("java.class.path",curCP + ":plugins/" + tempPlugin + ".jar");
+						
+						//System.out.println(System.getProperty("java.class.path"));
+						
 						// Probably a plugin, add it to the list.
 						pluginList.add(0,"plugins." + tempPlugin + "." + tempPlugin + "Main");
 					}
@@ -59,6 +62,7 @@ public class pluginManager
 			}
 		}
 		
+		// For every plugin in the list, get an object from it.
 		for (int x=0; x < pluginList.size(); x++)
 		{
 			Class c = null;
@@ -66,13 +70,13 @@ public class pluginManager
 			Object o = null;
 
 			try	{ c = Class.forName(pluginList.get(x).toString()); }
-			catch (Throwable e) { new exhandle("No class found: ", e, 1); }
+			catch (Throwable e) { new exhandle("No class found: ", e); }
 
 			try { con = c.getConstructor(); }
-			catch (Throwable e) { new exhandle("Failed to get constructor: ", e, 1); }
+			catch (Throwable e) { new exhandle("Failed to get constructor: ", e); }
 
 			try { o = con.newInstance(); }
-			catch (Throwable e) { new exhandle("Failed to make a new instance: ", e, 1); }
+			catch (Throwable e) { new exhandle("Failed to make a new instance: ", e); }
 
 			pluginObjectList.add(0,(plugin)o);
 		}

@@ -1,8 +1,6 @@
-package plugins.video;
+package com.kaear.gui;
 
-import com.kaear.cli.*;
 import com.kaear.common.*;
-import com.kaear.gui.*;
 import com.kaear.res.images;
 
 // The gui ...
@@ -20,19 +18,16 @@ import java.io.File;
 import java.lang.Process;
 import java.sql.ResultSet;
 
-public class videoGuiComponents
+public class guiComponents
 {
-	private int verbosityLevel;
-
-	public videoGuiComponents()
+	public guiComponents()
 	{
-		verbosityLevel = videoMain.verbosityLevel;
 	}
 	
 	/**
 	 *  Helper function to build combo boxes. 
 	 */
-	protected JComboBox makeCombo(String preItem, String sqlstmt, int getItem, String command, ActionListener al, float alignment)
+	public JComboBox makeCombo(String preItem, String sqlstmt, int getItem, String command, ActionListener al, float alignment)
 	{
 		JComboBox dropList = new JComboBox();
 
@@ -49,7 +44,7 @@ public class videoGuiComponents
 				rs.next();
 				dropList.addItem(rs.getString(getItem));
 			}
-		} catch (Throwable e) { new exhandle("makeCombo() failed with: ", e, verbosityLevel); }
+		} catch (Throwable e) { new exhandle("makeCombo() failed with: ", e); }
 		
 		dropList.setSelectedIndex(0);
 		dropList.setMinimumSize(new Dimension(120,20));
@@ -64,7 +59,7 @@ public class videoGuiComponents
 	/**
 	 *  Helper function to build combo boxes. 
 	 */
-	protected JComboBox makeCombo(String[] dropNames, String command, ActionListener al, float alignment)
+	public JComboBox makeCombo(String[] dropNames, String command, ActionListener al, float alignment)
 	{
 		if (alignment == -1)
 			alignment = Component.LEFT_ALIGNMENT;
@@ -83,12 +78,12 @@ public class videoGuiComponents
 	/**
 	 *  Helper function to build text fields. 
 	 */
-	protected JTextField makeText(JTextField thisText, String command, ActionListener al, float alignment)
+	public JTextField makeText(JTextField thisText, String command, ActionListener al, float alignment)
 	{
 		if (alignment == -1)
 			alignment = Component.LEFT_ALIGNMENT;
 
-		thisText.setColumns(20);
+		thisText.setColumns(15);
 		thisText.setMinimumSize(new Dimension(120,20));
 		thisText.setPreferredSize(new Dimension(120,20));
 		thisText.setMaximumSize(new Dimension(120,20));
@@ -99,9 +94,18 @@ public class videoGuiComponents
 	}
 	
 	/**
+	 *  Helper function to build text fields (with other widths!). 
+	 */
+	public JTextField makeText(JTextField thisText, String command, ActionListener al, float alignment, int columns)
+	{
+		JTextField thisText1 = makeText(thisText,command,al,alignment);
+		thisText1.setColumns(columns);
+		return thisText1;
+	}
+	/**
 	 *  Helper function to build side buttons.
 	 */
-	protected JButton buildButton(String name, String image, String action, ActionListener al, float alignment)
+	public JButton buildButton(String name, String image, String action, ActionListener al, float alignment)
 	{
 		ImageIcon myIcon = null;
 		if (image != null) { myIcon = new images().makeImage(image); }
@@ -122,7 +126,7 @@ public class videoGuiComponents
 	/**
 	 *  Helper function to build side toggle buttons.
 	 */
-	protected JToggleButton toggleButton(String name, String image, String action, ActionListener al, float alignment)
+	public JToggleButton toggleButton(String name, String image, String action, ActionListener al, float alignment)
 	{
 		ImageIcon myIcon = null;
 		if (image != null) { myIcon = new images().makeImage(image); }
@@ -143,7 +147,7 @@ public class videoGuiComponents
 	/**
 	 *  Helper function to build side toggle buttons.
 	 */
-	protected JSeparator buildSeparator()
+	public JSeparator buildSeparator()
 	{
 		JSeparator horizontalRule = new JSeparator();
 		horizontalRule.setMinimumSize(new Dimension(120,18));
@@ -151,6 +155,26 @@ public class videoGuiComponents
 		horizontalRule.setMaximumSize(new Dimension(120,18));
 		horizontalRule.setAlignmentX(Component.LEFT_ALIGNMENT);
 		return horizontalRule;
+	}
+	
+	/**
+	 *  Helper function to modify the way table fields are edited (Create a drop-down box)
+	 */
+	public void setUpTableField(JTable table, TableColumn tablecolumn, String sqlstmt)
+	{
+    	//Set up the editor for the artist list.
+    	JComboBox comboBox = new JComboBox();
+
+		try {
+			ResultSet rs = kerpowObjectManager.runDB.sqlExe(sqlstmt,"Format listing failed: ");
+			while (!rs.isLast())
+			{
+				rs.next();
+				comboBox.addItem(rs.getString(1));
+			}
+		} catch (Throwable e) { new exhandle("setUpTableField() failed with: ", e); }
+
+    	tablecolumn.setCellEditor(new DefaultCellEditor(comboBox));
 	}
 
 }

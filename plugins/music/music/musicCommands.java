@@ -1,6 +1,5 @@
 package plugins.music.music;
 
-import com.kaear.cli.*;
 import com.kaear.common.*;
 import com.kaear.gui.*;
 import plugins.music.*;
@@ -15,15 +14,11 @@ import java.util.Date;
 
 public class musicCommands implements Runnable
 {
-
-	private int verbosityLevel = 0;
-	private int[] columnWidths = new int[4];
 	private String cmd;
 	private Vector args;
 
 	public musicCommands(String cmd, Vector args)
 	{
-		verbosityLevel = musicMain.verbosityLevel;
 		this.args = new Vector();
 		this.args = args;
 		this.cmd = cmd;
@@ -33,39 +28,6 @@ public class musicCommands implements Runnable
 		}
 	}
 
-/*
-	private void countThreads()
-	{
-		  Thread [] threads = new Thread [Thread.activeCount ()];
-    	  int n = Thread.enumerate (threads);
-
-		  System.out.println(n);
-    	  for (int i = 0; i < n; i++)
-        	   System.out.println (threads [i].toString ());
-	}
-	
-	private void checkThreads()
-	{
-		Thread[] threads = new Thread[Thread.activeCount ()];
-		int n = Thread.enumerate (threads);
-
-		for (int i = 0; i < n; i++)
-		{
-			System.out.println (threads[i].toString ());
-			if (threads[i].getName().equals("Commands"))
-			{
-			/*
-				try { threads[i].join(); }
-				catch (Throwable e) { 
-					new exhandle("Unable to join the \"Commands\" thread: ",e,2); 
-				}
-			*/
-			/*
-			System.out.println("Yay! I'm alive!");
-			}
-		}
-	}
-*/	
 	public void run()
 	{
 		decodeCommand(cmd);
@@ -82,10 +44,8 @@ public class musicCommands implements Runnable
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
              public void run() {
 				new musicMainGui().updateTable(showDB());
+				kerpowgui.updateStatusBar("Update completed.");				
              }});
-		
-		kerpowgui.updateStatusBar("Update completed.");				
-
 
 		} else if (cmd.equals("showDB")) {
 			showDB();
@@ -94,54 +54,32 @@ public class musicCommands implements Runnable
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
              public void run() {
 				new musicMainGui().updateTable(searchDB((String)args.get(0),(String)args.get(1)));
+				kerpowgui.updateStatusBar("Search finished.");				
              }});
-
-		kerpowgui.updateStatusBar("Search finished.");				
 			 
-			//searchDB((String)args.get(0),(String)args.get(1));
-		} else if (cmd.equals("editRecord")) {
-			editRecord((String)args.get(0),(String)args.get(1),(String)args.get(2));
-		} else if (cmd.equals("editMusic")) {
-			editMusic((String)args.get(0),(String)args.get(1),(String)args.get(2),(String)args.get(3),(String)args.get(4));
-		} else if (cmd.equals("addRecord")) {
-			addRecord((String)args.get(0),(String)args.get(1));
-		} else if (cmd.equals("addMusic")) {
-			addMusic((String)args.get(0),(String)args.get(1),(String)args.get(2),(String)args.get(3));
-			
 		} else if (cmd.equals("runSQL")) {
 		
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
 				new musicMainGui().updateTable((String)args.get(0));
+				kerpowgui.updateStatusBar("SQL query completed.");
             }});
-
-			kerpowgui.updateStatusBar("SQL query completed.");
 
 		} else if (cmd.equals("deleteMusic")) {
 
 			kerpowObjectManager.runDB.sqlRun("DELETE FROM music WHERE id = " + args.get(0), "Delete from 'music' failed: ");
-
 			kerpowgui.updateStatusBar("Record deleted.");
 			
-		
 		} else if (cmd.equals("cleanMusic")) {
-			
-			kerpowgui.updateStatusBar(cleanMusic() + " artist(s) removed.");
-			
+		
 			javax.swing.SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+				kerpowgui.updateStatusBar(cleanMusic() + " artist(s) removed.");
 				new musicMainGui().updateTable(showDB());
             }});
 
-			
-			
-		/*} else if (cmd.equals("checkAlbum")) {
-			addMusic((String)args.get(0),(String)args.get(1),(String)args.get(2),(String)args.get(3));
-		} else if (cmd.equals("checkMusic")) {
-			addMusic((String)args.get(0),(String)args.get(1),(String)args.get(2),(String)args.get(3));
-		*/
 		} else {
-			System.out.println("Not a recognised command, sorry.");
+			new exhandle("Not a recognised command, sorry.",null);
 		}
 	}
 	
@@ -172,9 +110,12 @@ public class musicCommands implements Runnable
 		kerpowObjectManager.runDB.sqlRun("insert into format(name) values('CD')","\"format - CD\" population failed:");
 		kerpowObjectManager.runDB.sqlRun("insert into format(name) values('CD Original')","\"format - CD Original\" population failed:");
 		
+		// Add a useful album
+		kerpowObjectManager.runDB.sqlRun("insert into album(name) values('None')","\"album - None\" population failed:");
+
 		// Make sure we don't do this every time
 		try { new File(".status/run.music").createNewFile(); }
-		catch (Throwable e) { new exhandle("Cannot create file run.music! ",e,2); }
+		catch (Throwable e) { new exhandle("Cannot create file run.music! ",e); }
 	}
 	
 	public boolean checkRun()
@@ -188,7 +129,6 @@ public class musicCommands implements Runnable
 	 */
 	protected void updateDB(String[] mpath, String[] epath/*, String format*/)
 	{
-				System.out.println("Now updating the music database ...");
 		String[] musicpath = mpath;
 		for (int x = 0; x < musicpath.length; x++)
 		{
@@ -214,7 +154,7 @@ public class musicCommands implements Runnable
 		} else {
 			int intVal = -1;
 			try { intVal = Integer.parseInt(value,10);
-			} catch (Throwable e) { new exhandle("Value is not a number, therefore must be a string: ", e, verbosityLevel); }
+			} catch (Throwable e) { new exhandle("Value is not a number, therefore must be a string: ", e); }
 			String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.disc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id";
 			if (intVal == -1) {
 				sqlstmt+=" WHERE " + type + ".name LIKE '%" + value.replaceAll("'","''") + "%'";
@@ -231,7 +171,7 @@ public class musicCommands implements Runnable
 	{
 		int intVal = -1;
 		try { intVal = Integer.parseInt(value,10);
-		} catch (Throwable e) { new exhandle("Value is not a number, therefore must be a string: ", e, verbosityLevel); }
+		} catch (Throwable e) { new exhandle("Value is not a number, therefore must be a string: ", e); }
 		String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.disc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id WHERE music.disc = " + intVal;
 		return sqlstmt;
 	}
@@ -240,13 +180,10 @@ public class musicCommands implements Runnable
 	{
 		int intVal = -1;
 		try { intVal = Integer.parseInt(value,10);
-		} catch (Throwable e) { new exhandle("Value is not a number, therefore must be a string: ", e, verbosityLevel); }
-		//String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.disc, alias.alias FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id JOIN alias ON artist.id = alias.master ";
+		} catch (Throwable e) { new exhandle("Value is not a number, therefore must be a string: ", e); }
 		String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.disc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id ";
 		
 		if (intVal == -1) {
-			//sqlstmt+="WHERE artist.name LIKE '%" + value.replaceAll("'","''") + "%' OR alias.alias LIKE '%" + value.replaceAll("'","''") + "%'";
-			
 			sqlstmt = "(" + sqlstmt;
 			sqlstmt+="WHERE artist.name LIKE '%" + value.replaceAll("'","''") + "%') ";
 			sqlstmt+="UNION ";
@@ -297,7 +234,7 @@ public class musicCommands implements Runnable
 	{
 		int intVal = 0;
 		try { intVal = Integer.parseInt(disc,10);
-		} catch (Throwable e) { new exhandle("Value is not a number, therefore must be a string: ", e, verbosityLevel); }
+		} catch (Throwable e) { new exhandle("Value is not a number, therefore must be a string: ", e); }
 		makeMusicCombo(checkAlbum(album),checkArtist(artist),checkFormat(format),intVal);
 	}
 
@@ -329,11 +266,11 @@ public class musicCommands implements Runnable
 	{
 		int intVal = -1;
 		try { intVal = Integer.parseInt(id,10);
-		} catch (Throwable e) { new exhandle("Music ID is not a number: ", e, verbosityLevel); }
+		} catch (Throwable e) { new exhandle("Music ID is not a number: ", e); }
 		
 		int mVal = 0;
 		try { mVal = Integer.parseInt(disc,10);
-		} catch (Throwable e) { new exhandle("disc value is not a number: ", e, verbosityLevel); }
+		} catch (Throwable e) { new exhandle("disc value is not a number: ", e); }
 	
 		String sqlstmt = "UPDATE music SET artist = '" + checkArtist(artist) + "', album = '" + checkAlbum(album) + "', format = '" + checkFormat(format) + "', disc = " + disc + " WHERE id = " + intVal;
 		kerpowObjectManager.runDB.sqlRun(sqlstmt,"Failed to make music combo: ");
@@ -343,6 +280,7 @@ public class musicCommands implements Runnable
 	{
 		Vector delList = new Vector();
 		int deleted = 0;
+		boolean unUsed = false;
 		
 		try
 		{
@@ -354,7 +292,7 @@ public class musicCommands implements Runnable
 				delList.add(0,rs.getString(1));
 			}
 		}
-		catch (Throwable e) { new exhandle("cleanMusic failed: ", e, verbosityLevel); }
+		catch (Throwable e) { new exhandle("cleanMusic failed: ", e); }
 
 				// For every artist ...
 				for (int x = 0; x < delList.size(); x++)
@@ -366,15 +304,34 @@ public class musicCommands implements Runnable
 						// Check it's use in music
 						if (rs.getInt(1) == 0)
 						{
-							// Delete if not used.
-							kerpowObjectManager.runDB.sqlRun("DELETE FROM artist WHERE id = " + delList.get(x),"Oh yeah, really really wrong: ");
-							deleted++;
+							unUsed = true;
 						}
-						
+						// Delete all aliases with that artist.
+						//kerpowObjectManager.runDB.sqlRun("DELETE FROM alias WHERE master = " + delList.get(x),"Really wrong, guv: ");
+					}
+					catch (Throwable e) { new exhandle("cleanMusic failed: ", e); }
+					
+					if (unUsed) {
+						try {
+							ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT count(master) FROM alias WHERE master = " + delList.get(x),"Really wrong, guv: ");
+							rs.next();
+
+							// Check it's use in aliases
+							if (rs.getInt(1) > 0)
+							{
+								unUsed = false;
+							}
+						}
+						catch (Throwable e) { new exhandle("cleanMusic failed: ", e); }
+					}
+					
+					if (unUsed) {
+						// Delete if not used.
+						kerpowObjectManager.runDB.sqlRun("DELETE FROM artist WHERE id = " + delList.get(x),"Oh yeah, really really wrong: ");
 						// Delete all aliases with that artist.
 						kerpowObjectManager.runDB.sqlRun("DELETE FROM alias WHERE master = " + delList.get(x),"Really wrong, guv: ");
+						deleted++;
 					}
-					catch (Throwable e) { new exhandle("cleanMusic failed: ", e, verbosityLevel); }
 				}
 		return deleted;
 	}
@@ -409,13 +366,22 @@ public class musicCommands implements Runnable
 						if (checkArtist(children[i]) != -1)
 						{
 							// Yes.
-							new exhandle("Artist " + children[i] + " exists.", null, verbosityLevel);
+							new exhandle("Artist " + children[i] + " exists.", null);
 						} else {
 							// No - so add it to the artist table
 							kerpowObjectManager.runDB.sqlRun("insert into artist(name) values('" + children[i].replaceAll("'","''") + "')","Error adding 'album': ");
 						}
 						// Now check the albums ...
 						updateAlbum(new File(dir, children[i]), epath, children[i]);
+						
+						/*
+						if (updateAlbum(new File(dir, children[i]), epath, children[i]) == 0)
+						{
+							if (checkMusic(checkAlbum("None"), checkArtist(children[i])) == -1)
+							{
+								makeMusicCombo(checkAlbum("None"), checkArtist(children[i]), 1, 0);
+							}
+						}*/
 					}
 				}
 			}
@@ -427,43 +393,65 @@ public class musicCommands implements Runnable
 	 *
 	 *   ~~ Needs to be rewritten and parameterised with updateArtist ~~
 	 */
-	protected void updateAlbum(File dir, String[] epath, String parent)
+	protected int updateAlbum(File dir, String[] epath, String parent)
 	{
+		int result = 0;
+		
+		//System.out.println(dir + " : " + parent);
+		
 		if (dir.isDirectory()) {
 			//System.out.println(dir);
 
 			String[] children = dir.list();
+			
+			//System.out.println(children.length);
+			boolean flag = true;
 
-			for (int i=0; i<children.length; i++) 
-			{
-				if (new File(dir, children[i]).isDirectory())
+				for (int i=0; i<children.length; i++) 
 				{
-					// Is this in the exclude list?
-					boolean exclude = false;
-					for (int x=0; x<epath.length; x++) {
-						if ((new File(dir, children[i]).toString()).equals(epath[x])) { exclude = true; }
-					}
-					
-					if (!exclude)
+					if (new File(dir, children[i]).isDirectory())
 					{
-						// Does this album already exist?
-						if (checkAlbum(children[i]) != -1)
-						{
-							// Yes.
-							new exhandle("Album " + children[i] + " exists.", null, verbosityLevel);
-						} else {
-							// No - so add it to the album table
-							kerpowObjectManager.runDB.sqlRun("insert into album(name) values('" + children[i].replaceAll("'","''") + "')","Error adding 'album': ");
+						flag = false;
+						// Is this in the exclude list?
+						boolean exclude = false;
+						for (int x=0; x<epath.length; x++) {
+							if ((new File(dir, children[i]).toString()).equals(epath[x])) { exclude = true; }
 						}
 
-						if (checkMusic(checkAlbum(children[i]), checkArtist(parent)) == -1)
+						if (!exclude)
 						{
-							makeMusicCombo(checkAlbum(children[i]), checkArtist(parent), 1, 0);
+							// Does this album already exist?
+							if (checkAlbum(children[i]) != -1)
+							{
+								// Yes.
+								new exhandle("Album " + children[i] + " exists.", null);
+							} else {
+								// No - so add it to the album table
+								kerpowObjectManager.runDB.sqlRun("insert into album(name) values('" + children[i].replaceAll("'","''") + "')","Error adding 'album': ");
+							}
+
+							if (checkMusic(checkAlbum(children[i]), checkArtist(parent)) == -1)
+							{
+								new exhandle("Adding " + children[i] + " by " + parent, null);
+								makeMusicCombo(checkAlbum(children[i]), checkArtist(parent), 1, 0);
+								result++;
+							}
 						}
 					}
 				}
+				
+			if (flag)
+			{
+				if (checkMusic(checkAlbum("None"), checkArtist(parent)) == -1)
+				{
+					new exhandle("Adding None by " + parent, null);
+					makeMusicCombo(checkAlbum("None"), checkArtist(parent), 1, 0);
+					result++;
+				}
 			}
+
         }
+		return result;
 	}
 	
 	/**
@@ -480,15 +468,20 @@ public class musicCommands implements Runnable
 	protected int checkArtist(String artistInfo)
 	{
 		String artist = artistInfo.replaceAll("'","''");
-		//System.out.println(artist);
+//		System.out.println(artist);
 		int result = -1;
+		
+		String sqlstmt = "SELECT * FROM artist WHERE name = '" + artist + "'";
+		//System.out.println(sqlstmt);
+		
 		try
 		{
-			ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT * FROM artist WHERE name = '" + artist + "'"," ");
+			ResultSet rs = kerpowObjectManager.runDB.sqlExe(sqlstmt," ");
 			rs.next();
-			if (artist.equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); }
+//			System.out.println(artist + " : " + rs.getString(2));
+			if (artist.replaceAll("''","'").equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); }
 		} 
-		catch (Throwable e) { new exhandle("checkArtist failed: ", e, verbosityLevel); }
+		catch (Throwable e) { new exhandle("checkArtist failed: ", e); }
 		
 		if (result == -1)
 		{
@@ -496,9 +489,9 @@ public class musicCommands implements Runnable
 			{
 				ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT master,alias FROM alias WHERE alias = '" + artist + "'"," ");
 				rs.next();
-				if (artist.equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); }
+				if (artist.replaceAll("''","'").equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); }
 			} 
-			catch (Throwable e) { new exhandle("checkArtist (alias) failed: ", e, verbosityLevel); }
+			catch (Throwable e) { new exhandle("checkArtist (alias) failed: ", e); }
 		}
 		return result;
 	}
@@ -509,15 +502,15 @@ public class musicCommands implements Runnable
 	protected int checkAlbum(String albumInfo)
 	{
 		String album = albumInfo.replaceAll("'","''");
-		//System.out.println(album);
+//		System.out.println(album);
 		int result = -1;
 		try
 		{
 			ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT * FROM album WHERE name = '" + album + "'"," ");
 			rs.next();
-			if (album.equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); } 
+			if (album.replaceAll("''","'").equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); } 
 		} 
-		catch (Throwable e) { new exhandle("checkAlbum failed: ", e, verbosityLevel); }
+		catch (Throwable e) { new exhandle("checkAlbum failed: ", e); }
 		
 		return result;
 	}
@@ -534,7 +527,7 @@ public class musicCommands implements Runnable
 			rs.next();
 			result = Integer.parseInt(rs.getString(1));
 		} 
-		catch (Throwable e) { new exhandle("checkMusic failed: ", e, verbosityLevel); }
+		catch (Throwable e) { new exhandle("checkMusic failed: ", e); }
 		
 		return result;
 	}
@@ -550,7 +543,7 @@ public class musicCommands implements Runnable
 			rs.next();
 			if (format.equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); } 
 		} 
-		catch (Throwable e) { new exhandle("checkFormat failed: ", e, verbosityLevel); }
+		catch (Throwable e) { new exhandle("checkFormat failed: ", e); }
 		
 		return result;
 	

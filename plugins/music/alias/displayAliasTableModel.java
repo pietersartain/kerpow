@@ -1,7 +1,7 @@
 package plugins.music.alias;
 
 import com.kaear.common.*;
-import com.kaear.cli.*;
+import com.kaear.interfaces.*;
 import com.kaear.gui.*;
 
 import javax.swing.*;

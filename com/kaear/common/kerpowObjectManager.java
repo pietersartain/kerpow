@@ -1,6 +1,5 @@
 package com.kaear.common;
 
-import com.kaear.cli.*;
 import com.kaear.gui.*;
 
 import java.util.Vector;

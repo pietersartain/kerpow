@@ -1,2 +1,1 @@
 Main-Class: com.kaear.gui.kerpowgui
-Class-Path: derbytools.jar derby.jar plugins/music.jar

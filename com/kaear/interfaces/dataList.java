@@ -1,7 +1,6 @@
-package com.kaear.gui;
+package com.kaear.interfaces;
 
 import com.kaear.common.*;
-import com.kaear.cli.*;
 
 import javax.swing.*;
 import javax.swing.table.*;

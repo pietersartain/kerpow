@@ -1,6 +1,5 @@
 package com.kaear.common;
 
-import com.kaear.cli.*;
 import com.kaear.gui.*;
 
 
@@ -25,12 +24,10 @@ public class dbase
 	private Statement s;
 	private Statement screate;
 	private Connection conn;
-	private int verbosityLevel = 0;
 
 	public dbase()
 	{
-		verbosityLevel = kerpowObjectManager.verbosityLevel;
-    	System.out.println("Initialising the database ...");
+    	new exhandle("Initialising the database ...", null);
 
 		try
 		{
@@ -42,7 +39,7 @@ public class dbase
 
 			conn = DriverManager.getConnection(protocol + "kerpowDB;create=true");
 
-        	System.out.println("Connected to database kerpowDB\n");
+			new exhandle("Connected to database kerpowDB\n", null);
 
         	conn.setAutoCommit(false);
 			s = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -51,7 +48,7 @@ public class dbase
         	}
 		catch (Throwable e)
         	{
-        	    new exhandle("dbase init failed:", e, verbosityLevel);
+        	    new exhandle("dbase init failed:", e);
 		}
 
 	}
@@ -60,7 +57,7 @@ public class dbase
 	{
 		try { return conn.getMetaData(); } 
 		catch (Throwable e) { 
-		System.out.println("getMetaData failed: " + e); 
+		new exhandle("getMetaData failed: ", e);
 		return null; }
 	}
 	
@@ -76,7 +73,7 @@ public class dbase
 		}
 		catch (Throwable e)
         	{
-        	    new exhandle("deInit failed:", e, verbosityLevel);
+        	    new exhandle("deInit failed:", e);
 		}
 
 	}
@@ -88,7 +85,7 @@ public class dbase
 			conn.commit();
 		} catch (Throwable e)
         	{
-        	    new exhandle("Commit failed:", e, verbosityLevel);
+        	    new exhandle("Commit failed:", e);
 		}
 	}
 
@@ -103,7 +100,7 @@ public class dbase
 			return true;
 		}
 		catch (Throwable e) { 
-			new exhandle(error, e, verbosityLevel);
+			new exhandle(error, e);
 			return false;
 		}
 	}
@@ -114,13 +111,12 @@ public class dbase
 	public boolean sqlRun(String sqlstmt, String error)
 	{
 		try {
-			//System.out.println("Now executing ..." + sqlstmt);
 			s.execute(sqlstmt);
 			dbCommit();
 			return true;
 		}
 		catch (Throwable e) { 
-			new exhandle(error, e, verbosityLevel);
+			new exhandle(error, e);
 			return false;
 		}
 	}
@@ -134,14 +130,9 @@ public class dbase
 			return s.executeQuery(sqlstmt);
 		}
 		catch (Throwable e) { 
-			new exhandle(error, e, verbosityLevel);
+			new exhandle(error, e);
 			return null;
 		}
 	}
 
-	public void setVerbosity(int level)
-	{
-		verbosityLevel = level;
-	}
-	
 }

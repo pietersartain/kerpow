@@ -1,16 +1,16 @@
-package plugins.video;
+package plugins.minidisk;
 
 import com.kaear.common.*;
 import com.kaear.interfaces.*;
 
-public class videoMain implements plugin
+public class minidiskMain implements plugin
 {
-	private static guiPlugin Gui = new videoMainGui();
+	private static guiPlugin Gui = new minidiskGui();
 	
-	public videoMain()
+	public minidiskMain()
 	{
 		// See if we've been run before:
-		videoCommands vc = new videoCommands(null,null);
+		minidiskCommands vc = new minidiskCommands(null,null);
 		if (!vc.checkRun()) {
 			vc.createTables();
 		}
@@ -23,7 +23,7 @@ public class videoMain implements plugin
 	
 	public String getPluginName()
 	{
-		String myString = new String("video");
+		String myString = new String("minidisk");
 		return myString;
 	}
 
