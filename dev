@@ -1,4 +1,4 @@
-export CLASSPATH="/opt/Cloudscape10.0/lib/derby.jar:/opt/Cloudscape10.0/lib/derbytools.jar:${CLASSPATH}"
+export CLASSPATH="/opt/Cloudscape10.0/lib/derby.jar:/opt/Cloudscape10.0/lib/derbytools.jar:ui/:lists/:${CLASSPATH}"
 
 if [ "$2" = "--verbose" ]; then
 echo "Exporting classpath ..."

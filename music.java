@@ -18,7 +18,7 @@ public class music
 
 	public music()
 	{
-		verbosityLevel = kerpow.verbosityLevel;
+		verbosityLevel = kerpowObjectManager.verbosityLevel;
 		//System.out.println(verbosityLevel);
 	}
 	
@@ -66,27 +66,27 @@ public class music
 			// Make the tables:
 			
 		// Artist
-		kerpow.runDB.sqlMake("create table artist(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128))","'Artist' creation failed:");
+		kerpowObjectManager.runDB.sqlMake("create table artist(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128))","'Artist' creation failed:");
 		
 		// Alias
-		kerpow.runDB.sqlMake("create table alias(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128), artistid int)","'Alias' creation failed:");
+		kerpowObjectManager.runDB.sqlMake("create table alias(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128), artistid int)","'Alias' creation failed:");
 
 		// Album	
-		kerpow.runDB.sqlMake("create table album(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128))","'Album' creation failed:");
+		kerpowObjectManager.runDB.sqlMake("create table album(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128))","'Album' creation failed:");
 		
 		// Music
-		kerpow.runDB.sqlMake("create table music(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, artist int, album int, format int, misc int)","'Music' creation failed:");
+		kerpowObjectManager.runDB.sqlMake("create table music(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, artist int, album int, format int, misc int)","'Music' creation failed:");
 			
 		// Format
-		kerpow.runDB.sqlMake("create table format(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128))","'Format' creation failed:");
+		kerpowObjectManager.runDB.sqlMake("create table format(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128))","'Format' creation failed:");
 		
 		// Populate the format table
-		kerpow.runDB.sqlRun("insert into format(name) values('MP3')","\"format - MP3\" population failed:");
-		kerpow.runDB.sqlRun("insert into format(name) values('CD')","\"format - CD\" population failed:");
-		kerpow.runDB.sqlRun("insert into format(name) values('CD Original')","\"format - CD Original\" population failed:");
+		kerpowObjectManager.runDB.sqlRun("insert into format(name) values('MP3')","\"format - MP3\" population failed:");
+		kerpowObjectManager.runDB.sqlRun("insert into format(name) values('CD')","\"format - CD\" population failed:");
+		kerpowObjectManager.runDB.sqlRun("insert into format(name) values('CD Original')","\"format - CD Original\" population failed:");
 		
 		// Release recordsets
-		//kerpow.runDB.dbCommit();
+		//kerpowObjectManager.runDB.dbCommit();
 	}
 
 	
@@ -137,11 +137,28 @@ public class music
 		return displayDB(sqlstmt);
 	}
 	
+/*
 	private int displayDB(String sqlstmt)
 	{
 		int recordnum = 0;
 		try {
-			ResultSet rs = kerpow.runDB.sqlExe(sqlstmt,null);
+			ResultSet rs = kerpowObjectManager.runDB.sqlExe(sqlstmt,null);
+			while (!rs.isLast())
+			{
+				rs.next();
+				System.out.println(fixW(rs.getString(1),columnWidths[0]) + fixW(rs.getString(2),columnWidths[1]) + " " + fixW(rs.getString(3),columnWidths[2]) + " " + fixW(rs.getString(4),columnWidths[3]) + fixW(rs.getString(5),columnWidths[4]));
+				recordnum++;
+			}
+		} catch (Throwable e) { new exhandle("displayDB failed with: ", e, verbosityLevel); }
+		
+		return recordnum;
+	}
+*/	
+	private int displayDB(String sqlstmt)
+	{
+		int recordnum = 0;
+		try {
+			ResultSet rs = kerpowObjectManager.runDB.sqlExe(sqlstmt,null);
 			while (!rs.isLast())
 			{
 				rs.next();
@@ -156,7 +173,7 @@ public class music
 	private void addRecord(String type, String Value)
 	{
 		String sqlstmt = "INSERT INTO " + type + "(name) VALUES('" + Value.replaceAll("'","''") + "')";
-		if (kerpow.runDB.sqlRun(sqlstmt,null)) { System.out.println("Updated."); }
+		if (kerpowObjectManager.runDB.sqlRun(sqlstmt,null)) { System.out.println("Updated."); }
 	}
 	
 	private void addMusic(String artist, String album, String format, String misc)
@@ -181,7 +198,7 @@ public class music
 			sqlstmt = "UPDATE " + type + " SET name = '" + newValue.replaceAll("'","''") + "' WHERE id = " + theID;
 		}
 
-		if (kerpow.runDB.sqlRun(sqlstmt,null)) { System.out.println("Updated."); }
+		if (kerpowObjectManager.runDB.sqlRun(sqlstmt,null)) { System.out.println("Updated."); }
 	}
 
 	private void editMusic(String id, String artist, String album, String format, String misc)
@@ -195,7 +212,7 @@ public class music
 		} catch (Throwable e) { new exhandle("Misc value is not a number: ", e, verbosityLevel); }
 	
 		String sqlstmt = "UPDATE music SET artist = '" + checkArtist(artist) + "', album = '" + checkAlbum(album) + "', format = '" + checkFormat(format) + "', misc = " + misc + " WHERE id = " + intVal;
-		kerpow.runDB.sqlRun(sqlstmt,"Failed to make music combo: ");
+		kerpowObjectManager.runDB.sqlRun(sqlstmt,"Failed to make music combo: ");
 	}
 
 	/**
@@ -251,7 +268,7 @@ public class music
 							new exhandle("Artist " + children[i] + " exists.", null, verbosityLevel);
 						} else {
 							// No - so add it to the artist table
-							kerpow.runDB.sqlRun("insert into artist(name) values('" + children[i].replaceAll("'","''") + "')","Error adding 'album': ");
+							kerpowObjectManager.runDB.sqlRun("insert into artist(name) values('" + children[i].replaceAll("'","''") + "')","Error adding 'album': ");
 						}
 						// Now check the albums ...
 						updateAlbum(new File(dir, children[i]), epath, children[i]);
@@ -292,7 +309,7 @@ public class music
 							new exhandle("Album " + children[i] + " exists.", null, verbosityLevel);
 						} else {
 							// No - so add it to the album table
-							kerpow.runDB.sqlRun("insert into album(name) values('" + children[i].replaceAll("'","''") + "')","Error adding 'album': ");
+							kerpowObjectManager.runDB.sqlRun("insert into album(name) values('" + children[i].replaceAll("'","''") + "')","Error adding 'album': ");
 						}
 
 						if (checkMusic(checkAlbum(children[i]), checkArtist(parent)) == -1)
@@ -310,7 +327,7 @@ public class music
 	 */
 	private void makeMusicCombo(int album, int artist, int format, int misc)
 	{
-		kerpow.runDB.sqlRun("insert into music(artist, album, format, misc) values(" + artist + ", " + album + ", " + format + ", " + misc + ")","Failed to make music combo: ");
+		kerpowObjectManager.runDB.sqlRun("insert into music(artist, album, format, misc) values(" + artist + ", " + album + ", " + format + ", " + misc + ")","Failed to make music combo: ");
 	}
 
 	/**
@@ -323,7 +340,7 @@ public class music
 		int result = -1;
 		try
 		{
-			ResultSet rs = kerpow.runDB.sqlExe("SELECT * FROM artist WHERE name = '" + artist + "'"," ");
+			ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT * FROM artist WHERE name = '" + artist + "'"," ");
 			rs.next();
 			if (artist.equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); }
 		} 
@@ -333,7 +350,7 @@ public class music
 		{
 			try
 			{
-				ResultSet rs = kerpow.runDB.sqlExe("SELECT artistid,name FROM alias WHERE name = '" + artist + "'"," ");
+				ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT artistid,name FROM alias WHERE name = '" + artist + "'"," ");
 				rs.next();
 				if (artist.equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); }
 			} 
@@ -352,7 +369,7 @@ public class music
 		int result = -1;
 		try
 		{
-			ResultSet rs = kerpow.runDB.sqlExe("SELECT * FROM album WHERE name = '" + album + "'"," ");
+			ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT * FROM album WHERE name = '" + album + "'"," ");
 			rs.next();
 			if (album.equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); } 
 		} 
@@ -369,7 +386,7 @@ public class music
 		int result = -1;
 		try
 		{
-			ResultSet rs = kerpow.runDB.sqlExe("SELECT * FROM music WHERE artist = " + artist + " AND album = " + album," ");
+			ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT * FROM music WHERE artist = " + artist + " AND album = " + album," ");
 			rs.next();
 			result = Integer.parseInt(rs.getString(1));
 		} 
@@ -385,7 +402,7 @@ public class music
 		int result = -1;
 		try
 		{
-			ResultSet rs = kerpow.runDB.sqlExe("SELECT * FROM format WHERE name = '" + format + "'"," ");
+			ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT * FROM format WHERE name = '" + format + "'"," ");
 			rs.next();
 			if (format.equals(rs.getString(2))) { result = Integer.parseInt(rs.getString(1)); } 
 		} 
@@ -404,7 +421,7 @@ public class music
 	}
 	
 	/**
-	 *   Sets the verbosityLevel.  Deprecated in favour of public verbosityLevel in kerpow.java
+	 *   Sets the verbosityLevel.  Deprecated in favour of public verbosityLevel in kerpowObjectManager.java
 	 */
 	public void setVerbosity(int level)
 	{
@@ -426,7 +443,7 @@ public class music
 			}
 		}
 		else if (command[0].equals("update")) {
-			updateDB(kerpow.preferences.getMusicPath(),kerpow.preferences.getExcludePath());
+			updateDB(kerpowObjectManager.preferences.getMusicPath(),kerpowObjectManager.preferences.getExcludePath());
 		}
 		else if (command[0].equals("edit") && command.length > 1) {
 			if (command[1].equals("artist") | command[1].equals("album") | command[1].equals("format") | command[1].equals("alias")) {

@@ -13,8 +13,8 @@ public class admin
 
 	public admin()
 	{
-		verbosityLevel = kerpow.verbosityLevel;
-		columnWidths = kerpow.preferences.getColumns();
+		verbosityLevel = kerpowObjectManager.verbosityLevel;
+		columnWidths = kerpowObjectManager.preferences.getColumns();
 	}
 	
 	private void runsql(String sqlstmt)
@@ -22,7 +22,7 @@ public class admin
 		System.out.println("Running: \n" + sqlstmt);
 		if (sqlstmt.startsWith("UPDATE") | sqlstmt.startsWith("INSERT INTO"))
 		{
-			kerpow.runDB.sqlRun(sqlstmt,"runsql failed on UPDATE/INSERT: ");
+			kerpowObjectManager.runDB.sqlRun(sqlstmt,"runsql failed on UPDATE/INSERT: ");
 		} else if (sqlstmt.startsWith("SELECT")) {
 			String[] clString = sqlstmt.split("\\s");
 			String table = "";
@@ -37,7 +37,7 @@ public class admin
 			}
 			
 			try {
-			ResultSet rs = kerpow.runDB.sqlExe(sqlstmt,"runsql failed on SELECT: ");
+			ResultSet rs = kerpowObjectManager.runDB.sqlExe(sqlstmt,"runsql failed on SELECT: ");
 			displayDB(rs,1,getColumnNumber(table)+1);
 			} catch (Throwable e) {}
 		} else {
@@ -55,7 +55,7 @@ public class admin
 		
 		if (table.equals("tables"))
 		{
-			DatabaseMetaData thisdb = kerpow.runDB.getMetaData();
+			DatabaseMetaData thisdb = kerpowObjectManager.runDB.getMetaData();
 			
 			if (selAll){
 				try {
@@ -108,7 +108,7 @@ public class admin
 		}else{
 			sqlstmt+=valN;
 		}
-		return kerpow.runDB.sqlRun(sqlstmt,"Failed to add records: ");
+		return kerpowObjectManager.runDB.sqlRun(sqlstmt,"Failed to add records: ");
 	}
 	
 	private boolean edit(String table, String newvalue, String column, String oldvalue)
@@ -139,7 +139,7 @@ public class admin
 		} else {
 			sqlstmt+="id = " + intVal;
 		}
-		return kerpow.runDB.sqlRun(sqlstmt,"Failed to edit records: ");
+		return kerpowObjectManager.runDB.sqlRun(sqlstmt,"Failed to edit records: ");
 	}
 	
 	private boolean delete(String table, String column, String value)
@@ -155,7 +155,7 @@ public class admin
 		} else {
 			sqlstmt+="id = " + intVal;
 		}
-		return kerpow.runDB.sqlRun(sqlstmt,"Failed to delete records: ");
+		return kerpowObjectManager.runDB.sqlRun(sqlstmt,"Failed to delete records: ");
 	}
 
 	/**
@@ -180,7 +180,7 @@ public class admin
 
 	private int getColumnNumber(String tablename)
 	{
-		DatabaseMetaData thisdb = kerpow.runDB.getMetaData();
+		DatabaseMetaData thisdb = kerpowObjectManager.runDB.getMetaData();
 		int result = 0;
 		try {
 			ResultSet rs = thisdb.getColumns("SYS","APP",tablename,null);
@@ -197,7 +197,7 @@ public class admin
 	{
 		int recordnum = 0;
 		try {
-			ResultSet rs = kerpow.runDB.sqlExe(sqlstmt,null);
+			ResultSet rs = kerpowObjectManager.runDB.sqlExe(sqlstmt,null);
 			while (rs.next())
 			{
 				//System.out.println(fixW(rs.getString(1),columnWidths[0]) + fixW(rs.getString(2),columnWidths[1]) + fixW(rs.getString(3),columnWidths[2]) + fixW(rs.getString(4),columnWidths[3]) + fixW(rs.getString(5),columnWidths[4]));
