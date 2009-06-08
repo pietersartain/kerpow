@@ -1,3 +1,8 @@
+package com.kaear.common;
+
+import com.kaear.cli.*;
+import com.kaear.gui.*;
+
 import java.io.*;
 import java.util.ArrayList;
 
@@ -105,7 +110,7 @@ private int[] columnWidths = new int[5];
 	{
 		System.out.println("\nVerbosity level: " + verbosityLevel);
 		
-		System.out.println("\nMusic paths:");
+/*		System.out.println("\nMusic paths:");
 		for (int x=0; x<musicpath.size(); x++)
 		{
 			System.out.println(musicpath.get(x).toString());
@@ -122,6 +127,7 @@ private int[] columnWidths = new int[5];
 		{
 			System.out.print(columnWidths[x] + "  ");
 		}
+*/
 		System.out.println("\n");
 	}
 	

@@ -1,7 +1,10 @@
+package com.kaear.common;
+
+import com.kaear.cli.*;
+import com.kaear.gui.*;
+
 public class exhandle
 {
-
-//private int verbosityLevel;
 
 	public exhandle(String message, Throwable e, int verbosityLevel)
 	{
@@ -22,18 +25,7 @@ public class exhandle
 				else if (eX.equals("null")) { flag = 0; }
 				else { flag = 1; }
 			}
-			
 			if (flag == 1) { System.out.println(message + eX); }
 		}
-		
-		//System.out.println("This has come from exhandle!");
-
 	}
-	
-	/*
-	public void setVerbosity(int verbosity)
-	{
-		verbosityLevel = verbosity;
-	}
-	*/
 }

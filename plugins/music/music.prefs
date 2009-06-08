@@ -2,7 +2,8 @@
  | Music directory locations (absolute paths) |
  \--------------------------------------------/
 
-/#music /home/administrator/docs/javasrc/music
+#music /home/administrator/docs/javasrc/music
+#music /home/administrator/Music
 
  >--------------------------------------------<
  |  Music directory structure  				  |
@@ -12,7 +13,7 @@
  |	artist - album   	       				  |
  \--------------------------------------------/
 
-/#structure artist/album
+#structure artist/album
 
  >--------------------------------------------<
  | Excluded directories 					  |
@@ -23,24 +24,10 @@
  >--------------------------------------------<
  | Column widths							  |
  >--------------------------------------------<
- |											  |
  | Music:     id artist album format misc     |
- |											  |
- | Software:  id name lastmod desc ftype type |
- |											  |
- | Games:     id title format misc			  |
- |											  |
- | Documents: id name type desc lastmod		  |
- |											  |
- | Video:     id format type misc disks		  |
- |    Series:      + name episodes season	  |
- |    Films:       + name					  |
- |											  |
  \--------------------------------------------/
 
-/#columns 5 20 30 5 5
-
-#dcols 5 20 30 5 5
+#columns 5 20 30 5 5
 
  >--------------------------------------------<
  | Verbosity level							  |

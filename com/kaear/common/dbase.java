@@ -1,3 +1,9 @@
+package com.kaear.common;
+
+import com.kaear.cli.*;
+import com.kaear.gui.*;
+
+
 // Database SQL imports
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -24,7 +30,7 @@ public class dbase
 	public dbase()
 	{
 	
-		verbosityLevel = kerpow.verbosityLevel;
+		verbosityLevel = kerpowObjectManager.verbosityLevel;
     	System.out.println("Initialising the database ...");
 
 		try
@@ -53,8 +59,10 @@ public class dbase
 	
 	public DatabaseMetaData getMetaData()
 	{
-		try { return conn.getMetaData();
-		} catch (Throwable e) { System.out.println("getMetaData failed: " + e); return null; }
+		try { return conn.getMetaData(); } 
+		catch (Throwable e) { 
+		System.out.println("getMetaData failed: " + e); 
+		return null; }
 	}
 	
 	public void deInit()
@@ -92,12 +100,13 @@ public class dbase
 	{
 		try {
 			screate.execute(sqlstmt);
+			dbCommit();
 			return true;
 		}
 		catch (Throwable e) { 
 			new exhandle(error, e, verbosityLevel);
 			return false;
-		}	
+		}
 	}
 
 	/**
@@ -105,14 +114,15 @@ public class dbase
 	 */
 	public boolean sqlRun(String sqlstmt, String error)
 	{
-			try {
+		try {
 			s.execute(sqlstmt);
+			dbCommit();
 			return true;
 		}
 		catch (Throwable e) { 
 			new exhandle(error, e, verbosityLevel);
 			return false;
-		}	
+		}
 	}
 
 	/**
@@ -126,8 +136,7 @@ public class dbase
 		catch (Throwable e) { 
 			new exhandle(error, e, verbosityLevel);
 			return null;
-		}	
-
+		}
 	}
 
 	public void setVerbosity(int level)

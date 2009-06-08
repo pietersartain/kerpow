@@ -1,3 +1,8 @@
+package plugins.music;
+
+import com.kaear.gui.*;
+import com.kaear.common.*;
+
 // Database SQL imports
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -14,15 +19,17 @@ public class musicList implements dataList
 {
 
 	private int verbosityLevel = 0;
-
-	public musicList()
+	private String sqlstmt;
+	
+	public musicList(String sqlstmt)
 	{
+		this.sqlstmt = sqlstmt;
 	}
 	
 	public Vector makeList()
 	{
 
-			String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.misc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id ORDER BY artist.name";
+			//String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.misc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id ORDER BY artist.name";
 
 		//dbase runDB = new dbase();
 		Vector data = new Vector();

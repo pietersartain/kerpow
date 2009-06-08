@@ -1,0 +1,86 @@
+export CLASSPATH="build/res/derby.jar:build/res/derbytools.jar:ui/:lists/:${CLASSPATH}"
+
+if [ "$2" = "--verbose" ]; then
+	echo "Exporting classpath ..."
+	echo "Classpath: " $CLASSPATH
+fi
+
+if [ "$2" = "--clean" ]; then
+	#rm ./*.class
+	echo "Cleaning up class files ... "
+	rm `find -name \*.class`
+fi
+
+if [ ! "$2" = "--no-compile" ]; then
+	clear
+	echo ""
+	echo "Compiling .java files ..."
+	echo ""
+	runme=FALSE
+	javac "$1".java
+	if [ $? = "0" ]; then
+		runme=TRUE
+	fi
+fi
+
+if [ "$2" = "--make-package" ]; then
+	cd ./build
+
+echo "Cleaning build area ..."
+#	rm kerpow.tar.bz2
+#	rm kerpow.tar
+#	rm ./*.class
+	rm *.jar
+	rm *.tar
+	rm *.tar.bz2
+	rm ./kerpow/* -dr
+
+echo "Building kerpow.jar ..."
+	cp -a ../com kerpow/
+#	rm `find -name \*.java`
+	find -name \*.java
+	cd kerpow
+	jar cmf ../res/manifest.txt kerpow.jar com/
+	rm -dr com/
+	cd ../
+
+echo "Preparing the package directory ..."
+	cp ./res/* ./kerpow/
+	cp ../kerpow.prefs ./kerpow/
+	mkdir kerpow/plugins/
+
+echo "Building music.jar ..."
+	cp -a ../plugins/music kerpow/plugins/
+#	rm `find -name \*.java`
+	find -name \*.java
+	cd kerpow/
+	jar cmf ../res/music-manifest.txt music.jar plugins/music/
+	mv music.jar plugins/
+	cd ../
+	rm kerpow/plugins/music/ -dr
+
+echo "Building kerpow-all.tar.bz2 ..."
+	tar -cf kerpow-all.tar kerpow
+	bzip2 -9 kerpow-all.tar
+
+else
+
+if [ $runme = "TRUE" ]; then
+
+	if [ ! "$1" = "" ]; then
+		echo "##############"
+		echo "#  Running!  #"
+		echo "##############"
+		echo ""
+		java $1
+		echo ""
+		echo "######################"
+		echo "#  Program finished  #"
+		echo "######################"
+	else
+		echo "######################################"
+		echo "#  Please specify class file to run! #"
+		echo "######################################"
+	fi
+fi
+fi

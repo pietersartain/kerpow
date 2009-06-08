@@ -1,3 +1,9 @@
+package com.kaear.cli;
+
+import com.kaear.common.*;
+import com.kaear.gui.*;
+
+
 // Database SQL imports
 import java.sql.Connection;
 import java.sql.DriverManager;

@@ -1,28 +1,31 @@
+package com.kaear.cli;
+
+import com.kaear.common.*;
+import com.kaear.gui.*;
+
 import java.io.File;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Vector;
 import java.beans.*;
+import java.lang.Thread;
 
 public class kerpow
 {
 
 	public static int verbosityLevel;
 	private static String thePrompt;
+	public static kerpowObjectManager kerpowObjectManager;
 	
-	// Objects
-	public static dbase runDB;
-	public static preferences preferences;
-	private static music music;
-	private static admin admin;
-
+	public kerpow()
+	{
+		kerpowObjectManager = new kerpowObjectManager();
+	}
+		
 	public static void main(String[] args)
 	{
-		initmain();
 		
-		if (!kerpow.checkRun())
-		{
-			kerpow.firstRun();
-		}
+		kerpow kerpow = new kerpow();
 		
 		if (args.length == 0) {
 			kerpow.cliOnly(args);
@@ -31,23 +34,7 @@ public class kerpow
 		} else {
 			kerpow.cliOnly(args);
 		}
-	}
-	
-	private static void initmain()
-	{
-		// Preferences
-		preferences = new preferences();
-		verbosityLevel = preferences.getVerbosity();
 		
-		// DB
-		runDB = new dbase();
-		
-		// Admin
-		admin = new admin();
-		
-		// Music
-		music = new music();
-		music.setColumns(preferences.getColumns());
 	}
 	
 	private static void interActive()
@@ -68,8 +55,7 @@ public class kerpow
 			parseInteractiveCommand(command);
 			
 		}
-		
-		runDB.deInit();
+		kerpowObjectManager.runDB.deInit();
 	}
 
 	private static void cliOnly(String[] args)
@@ -88,18 +74,25 @@ public class kerpow
 				{
 					clString[x-1] = args[x];
 				}
+				
+				
+				
+				// Get the plugin list
+				Vector pluginList = kerpowObjectManager.plugins.getPlugins();
 
-				if (args[0].equals("--music")) {
-					music.parseCommand(clString);
-				} else if (args[0].equals("--admin")) {
-					admin.parseCommand(clString);
-				} else {
-					System.out.println("args[0] != --music");
+				// For each plugin ...
+				for (int x=0; pluginList.size() > x; x++)
+				{
+					plugin curPlugin = (plugin)pluginList.get(x);
+					
+					if (args[0].equals("--" + curPlugin.getPluginName())) {
+						curPlugin.getTxt().parseCliCommand(clString);
+					}
 				}
 			}else{
 				System.out.println("args == 0");
 			}
-			runDB.deInit();
+			kerpowObjectManager.runDB.deInit();
 		}
 	}
 	
@@ -115,44 +108,69 @@ public class kerpow
 	
 	private static void parseInteractiveCommand(String command)
 	{
+		// Tokenize the command string coming in with spaces.
 		String[] clString = command.split("\\s");
 		
+		// If the first word is "home", set the prompt to it's default value.
 		if (clString[0].equals("home")) {
 			updatePrompt("default");
 			//printHelpI();
 		}
-		
-		if (thePrompt.equals(":music")) { 
-			music.parseCommand(clString); 
-		} else {
 
+		// Get the plugin list
+		Vector pluginList = kerpowObjectManager.plugins.getPlugins();
 
-			if (clString[0].equals("music")) {
-				updatePrompt("music");
-				music.help();
-			} else if (clString[0].equals("help"))	{ 
-				if (clString.length > 1) {
-					if (clString[1].equals("music")) { music.help(); } else
-					if (clString[1].equals("downloads")) { music.help(); } else
-					if (clString[1].equals("video")) { music.help(); } else
-					if (clString[1].equals("software")) { music.help(); } else
-					if (clString[1].equals("games")) { music.help(); } else
-					if (clString[1].equals("documents")) { music.help(); } else
-					if (clString[1].equals("admin")) { admin.help(); } else
-					if (clString[1].equals("home")) { printHelpI(); } else
-					{ printHelpI(); }
-				} else { 
-				printHelpI(); 
+		// For each plugin ...
+		for (int x=0; pluginList.size() > x; x++)
+		{
+			plugin curPlugin = (plugin)pluginList.get(x);
+			cliPlugin cliPlugin = (cliPlugin)curPlugin.getTxt();
+
+			// If the prompt is a plugin name
+			if (thePrompt.equals(":" + curPlugin.getPluginName())) {
+				// Send the whole command to the plugin's command parser.
+				cliPlugin.parseCommand(clString);
+
+			// Otherwise ...
+			} else{
+			
+				// If the first word is a plugin name
+				if (clString[0].equals(curPlugin.getPluginName())) {
+					// Update the prompt to the plugin name
+					updatePrompt(curPlugin.getPluginName());
+					// Show plugin's help.
+					//(cliPlugin)
+					cliPlugin.help();
+			
+				// Else if the first word is "help"
+				} else if (clString[0].equals("help")) {
+
+					// If there is more than one word in the command string
+					if (clString.length > 1) {
+
+						// If the second word is a plugin name
+						if (clString[1].equals(curPlugin.getPluginName())) {
+							// Show plugin's help
+							//(cliPlugin)
+							cliPlugin.help();
+						} else {
+							printHelpI();
+						}
+					
+					} else {
+						printHelpI();
+					}
+				} else {
+					printHelpI();
 				}
-			} else if (clString[0].equals("exit"))	{
-				System.out.println("Farewell!"); 
-			} else {
-				System.out.println("Command not recognised, use \"help\" to view available commands.");
 			}
-		
+		}
+
+		if (clString[0].equals("exit"))	{
+			System.out.println("Farewell!"); 
 		}
 	}
-
+/*
 	private static void firstRun()
 	{
 		// We haven't been run before, so let's do some stuff ...
@@ -183,12 +201,23 @@ public class kerpow
 		try { new File("run.once").createNewFile(); }
 		catch (Throwable e) { new exhandle("Cannot create file! ",e,2); }
 	}
-
+*/
 	private static void printHelp()
 	{
 		String msg = "";
 		msg+= "Welcome to kerpow!\n\n";
-		msg+="Areas of interest:\n\n";
+		msg+="Plugins available:\n\n";
+		
+		// Get the plugin list
+		Vector pluginList = kerpowObjectManager.plugins.getPlugins();
+
+		// For each plugin ...
+		for (int x=0; pluginList.size() > x; x++)
+		{
+			plugin curPlugin = (plugin)pluginList.get(x);
+			msg+="	--" + curPlugin.getPluginName() + "\n";
+		}
+/*
 		msg+="	--admin\n";
 		msg+="	--music\n";
 		msg+="	--downloads\n";
@@ -196,49 +225,56 @@ public class kerpow
 		msg+="	--software\n";
 		msg+="	--games\n";
 		msg+="	--documents\n\n";
-		msg+="	--<area of interest> help to show more specific commands.";
+*/
+		msg+="\n";
+		msg+="	--<plugin> help to show more specific commands.";
 		
 		System.out.println(msg);
 
-/*		
-		msg+= "Welcome to kerpow!\n\n";
-		msg+="	--interactive		starts an interactive command line session.\n\n";
-		msg+="	--create-tables		initialise the DB tables.\n";
-		msg+="	--update		populate the tables from your hdd.\n";
-		msg+="	--display		list all found music\n";
-		msg+="	--help			this message\n";
-		System.out.println(msg); */
 	}
 	
 	private static void printHelpI()
 	{
 		String msg = "";
+		
+		msg+="Interactive commands:\n\n";
 		/*
-		msg+="Interactive options:\n\n";
 		msg+="	create-tables		initialise the DB tables.\n";
 		msg+="	update			populate the tables from your hdd.\n";
 		msg+="	display			list all found music\n";
 		msg+="	help			this message\n";
 		msg+="	exit			quits kerpow\n";
 		*/
-		msg+="Areas of interest:\n\n";
-		msg+="	home (here)\n";
-		msg+="	admin\n\n";
+		msg+="	home (here)\n\n";
+		msg+="Plugins available:\n\n";
+		
+		// Get the plugin list
+		Vector pluginList = kerpowObjectManager.plugins.getPlugins();
+
+		// For each plugin ...
+		for (int x=0; pluginList.size() > x; x++)
+		{
+			plugin curPlugin = (plugin)pluginList.get(x);
+			msg+="	" + curPlugin.getPluginName() + "\n";
+		}
+		
+/*		msg+="	admin\n\n";
 		msg+="	music\n";
 		msg+="	downloads\n";
 		msg+="	video\n";
 		msg+="	software\n";
 		msg+="	games\n";
 		msg+="	documents\n";
-		msg+="\nhelp <area of interest> to show more specific commands.";
+*/
+		msg+="\nhelp <plugin> to show more specific commands.";
 		
 		System.out.println(msg);
 	}
-	
+/*	
 	private static boolean checkRun()
 	{
 			File runOnce = new File("run.once");
 			return runOnce.exists();
 	}
-
+*/
 }

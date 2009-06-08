@@ -1,69 +1,122 @@
+package plugins.music;
+
+import com.kaear.cli.*;
+import com.kaear.common.*;
+import com.kaear.gui.*;
+
 // Database SQL imports
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 // The rest...
-import java.util.Properties;
 import java.io.File;
-import java.lang.Process;
+import java.util.Vector;
+import java.util.Date;
 
-public class music
+public class musicCommands implements Runnable
 {
 
 	private int verbosityLevel = 0;
 	private int[] columnWidths = new int[4];
+	private String cmd;
+	private Vector args;
 
-	public music()
+	public musicCommands(String cmd, Vector args)
 	{
-		verbosityLevel = kerpowObjectManager.verbosityLevel;
-		//System.out.println(verbosityLevel);
+		verbosityLevel = musicMain.verbosityLevel;
+		this.args = new Vector();
+		this.args = args;
+		this.cmd = cmd;
+
+		if ((args != null) || (cmd != null)) {
+	  		new Thread (this, "Commands").start();
+		}
+	}
+
+/*
+	private void countThreads()
+	{
+		  Thread [] threads = new Thread [Thread.activeCount ()];
+    	  int n = Thread.enumerate (threads);
+
+		  System.out.println(n);
+    	  for (int i = 0; i < n; i++)
+        	   System.out.println (threads [i].toString ());
 	}
 	
+	private void checkThreads()
+	{
+		Thread[] threads = new Thread[Thread.activeCount ()];
+		int n = Thread.enumerate (threads);
+
+		for (int i = 0; i < n; i++)
+		{
+			System.out.println (threads[i].toString ());
+			if (threads[i].getName().equals("Commands"))
+			{
+			/*
+				try { threads[i].join(); }
+				catch (Throwable e) { 
+					new exhandle("Unable to join the \"Commands\" thread: ",e,2); 
+				}
+			*/
+			/*
+			System.out.println("Yay! I'm alive!");
+			}
+		}
+	}
+*/	
+	public void run()
+	{
+		decodeCommand(cmd);
+	}
+
 	/**
-	 *   Method call contents:
-	 *
-	 *		createTables()
-	 *
-	 *		User commands:
-	 *			updateDB()
- 	 *			showDB()
- 	 *			searchDB()
-	 *			editRecord()
-	 *			editMusic()
-	 *			addRecord()
-	 *			addMusic()
-	 *
-	 *		Helper routines:
-	 *			displayDB()	 
-	 *			fixW()
-	 *			checkArtist()
-	 *			checkAlbum()
-	 *			checkMusic()
-	 *
-	 *		updateArtist()
-	 *		updateAlbum()
-	 *		makeMusicCombo()	 
-	 *
-	 *		Mutators:
-	 *			setColumns()	 
-	 *			setVerbosity()
-	 *
-	 *		Interface extensions:
-	 *			parseCommand()
-	 *			buildCommands()
-	 *			help()
+	 *	The bit that decodes the commands to run in a thread!  Cool beans!
 	 */
-	 
-	 
+	private void decodeCommand(String cmd)
+	{
+		if (cmd.equals("updateDB")) {
+			updateDB((String[])args.get(0), (String[])args.get(1));
+
+			javax.swing.SwingUtilities.invokeLater(new Runnable() {
+             public void run() {
+				new musicMain().getGui().updateTable(showDB());
+             }});
+		
+		kerpowgui.updateStatusBar("Update completed.");				
+
+
+		} else if (cmd.equals("showDB")) {
+			showDB();
+		} else if (cmd.equals("searchDB")) {
+			
+			javax.swing.SwingUtilities.invokeLater(new Runnable() {
+             public void run() {
+				new musicMain().getGui().updateTable(searchDB((String)args.get(0),(String)args.get(1)));
+             }});
+
+		kerpowgui.updateStatusBar("Search finished.");				
+			 
+			//searchDB((String)args.get(0),(String)args.get(1));
+		} else if (cmd.equals("editRecord")) {
+			editRecord((String)args.get(0),(String)args.get(1),(String)args.get(2));
+		} else if (cmd.equals("editMusic")) {
+			editMusic((String)args.get(0),(String)args.get(1),(String)args.get(2),(String)args.get(3),(String)args.get(4));
+		} else if (cmd.equals("addRecord")) {
+			addRecord((String)args.get(0),(String)args.get(1));
+		} else if (cmd.equals("addMusic")) {
+			addMusic((String)args.get(0),(String)args.get(1),(String)args.get(2),(String)args.get(3));
+		} else {
+			System.out.println("Not a recognised command, sorry.");
+		}
+	}
+	
 	/**
 	 *   Generates the music database tables, and populates any default fields.
 	 */
 	public void createTables()
 	{
-			// Make the tables:
+		// Make the tables:
 			
 		// Artist
 		kerpowObjectManager.runDB.sqlMake("create table artist(id INT NOT NULL GENERATED ALWAYS AS IDENTITY primary key, name varchar(128))","'Artist' creation failed:");
@@ -84,18 +137,14 @@ public class music
 		kerpowObjectManager.runDB.sqlRun("insert into format(name) values('MP3')","\"format - MP3\" population failed:");
 		kerpowObjectManager.runDB.sqlRun("insert into format(name) values('CD')","\"format - CD\" population failed:");
 		kerpowObjectManager.runDB.sqlRun("insert into format(name) values('CD Original')","\"format - CD Original\" population failed:");
-		
-		// Release recordsets
-		//kerpowObjectManager.runDB.dbCommit();
 	}
-
-	
+	 
 	/**
 	 *   Updates the music database from the details in the prefs file.
 	 */
-	public void updateDB(String[] mpath, String[] epath/*, String format*/)
+	protected void updateDB(String[] mpath, String[] epath/*, String format*/)
 	{
-		System.out.println("Now updating the music database ...");
+				System.out.println("Now updating the music database ...");
 		String[] musicpath = mpath;
 		for (int x = 0; x < musicpath.length; x++)
 		{
@@ -105,24 +154,11 @@ public class music
 			updateArtist(dir, epath);
 		}
 	}
-
-	/**
-	 *   The main display function that shows all records in music:
-	 *
-	 *   dbID	artist		album		format	misc
-	 */
-	private int showDB()
-	{
-		String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.misc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id ORDER BY artist.name";
-		return displayDB(sqlstmt);
-	}
 	
 	/**
-	 *   A searchable display function that shows:
-	 *
-	 *   dbID	artist		album		format	misc
+	 *   A searchable display function that returns an SQL statement.
 	 */
-	private int searchDB(String type, String value)
+	protected String searchDB(String type, String value)
 	{
 		int intVal = -1;
 		try { intVal = Integer.parseInt(value,10);
@@ -134,49 +170,32 @@ public class music
 			sqlstmt+=" WHERE " + type + ".id = " + intVal;
 		}
 		sqlstmt+=" ORDER BY artist.name";
-		return displayDB(sqlstmt);
+		return sqlstmt;
+	}
+
+
+	/**
+	 *   Show the whole music database; in SQL format.
+	 */
+	protected String showDB()
+	{
+		String sqlstmt = "SELECT music.id, artist.name, album.name, format.name, music.misc FROM music JOIN artist ON music.artist = artist.id JOIN format ON music.format = format.id JOIN album ON music.album = album.id ORDER BY artist.name";
+		return sqlstmt;
 	}
 	
-/*
-	private int displayDB(String sqlstmt)
-	{
-		int recordnum = 0;
-		try {
-			ResultSet rs = kerpowObjectManager.runDB.sqlExe(sqlstmt,null);
-			while (!rs.isLast())
-			{
-				rs.next();
-				System.out.println(fixW(rs.getString(1),columnWidths[0]) + fixW(rs.getString(2),columnWidths[1]) + " " + fixW(rs.getString(3),columnWidths[2]) + " " + fixW(rs.getString(4),columnWidths[3]) + fixW(rs.getString(5),columnWidths[4]));
-				recordnum++;
-			}
-		} catch (Throwable e) { new exhandle("displayDB failed with: ", e, verbosityLevel); }
-		
-		return recordnum;
-	}
-*/	
-	private int displayDB(String sqlstmt)
-	{
-		int recordnum = 0;
-		try {
-			ResultSet rs = kerpowObjectManager.runDB.sqlExe(sqlstmt,null);
-			while (!rs.isLast())
-			{
-				rs.next();
-				System.out.println(fixW(rs.getString(1),columnWidths[0]) + fixW(rs.getString(2),columnWidths[1]) + " " + fixW(rs.getString(3),columnWidths[2]) + " " + fixW(rs.getString(4),columnWidths[3]) + fixW(rs.getString(5),columnWidths[4]));
-				recordnum++;
-			}
-		} catch (Throwable e) { new exhandle("displayDB failed with: ", e, verbosityLevel); }
-		
-		return recordnum;
-	}
-	
-	private void addRecord(String type, String Value)
+	/**
+	 *   Add to table "type" the value of "value"
+	 */
+	protected void addRecord(String type, String Value)
 	{
 		String sqlstmt = "INSERT INTO " + type + "(name) VALUES('" + Value.replaceAll("'","''") + "')";
 		if (kerpowObjectManager.runDB.sqlRun(sqlstmt,null)) { System.out.println("Updated."); }
 	}
 	
-	private void addMusic(String artist, String album, String format, String misc)
+	/**
+	 *   Add a record to the "music" table.
+	 */
+	protected void addMusic(String artist, String album, String format, String misc)
 	{
 		int intVal = 0;
 		try { intVal = Integer.parseInt(misc,10);
@@ -184,7 +203,11 @@ public class music
 		makeMusicCombo(checkAlbum(album),checkArtist(artist),checkFormat(format),intVal);
 	}
 
-	private void editRecord(String type, String oldValue, String newValue)
+	/**
+	 *   Update a record in table "type" with a current value of 
+	 *   "oldValue" to a new value of "newValue".
+	 */
+	protected void editRecord(String type, String oldValue, String newValue)
 	{
 		String sqlstmt = "";
 		int theID = -1;
@@ -201,7 +224,10 @@ public class music
 		if (kerpowObjectManager.runDB.sqlRun(sqlstmt,null)) { System.out.println("Updated."); }
 	}
 
-	private void editMusic(String id, String artist, String album, String format, String misc)
+	/**
+	 *   Update a record in the music table with the corresponding values.
+	 */
+	protected void editMusic(String id, String artist, String album, String format, String misc)
 	{
 		int intVal = -1;
 		try { intVal = Integer.parseInt(id,10);
@@ -215,32 +241,13 @@ public class music
 		kerpowObjectManager.runDB.sqlRun(sqlstmt,"Failed to make music combo: ");
 	}
 
-	/**
-	 *   Formats the width of the columns based on the columnWidths portion of the prefs file.
-	 */
-	private String fixW(String msg, int size)
-	{
-		String result = "";
-		if (msg.length() > size)
-		{
-			result = msg.substring(0,size-3) + "...";
-		} else {
-			int loopSize = size - (msg.length());
-			result = msg;
-			for (int x=0; x<loopSize; x++)
-			{
-				result+=" ";
-			}
-		}
-		return result;
-	}
 	
 	/**
 	 *   Checks to see if an artist (drawn from the music/ path) exists in the table "artist".  If no:  artist gets added.
 	 *
 	 *   ~~ Needs to be rewritten and parameterised with updateAlbum ~~
 	 */
-	private void updateArtist(File dir, String[] epath)
+	protected void updateArtist(File dir, String[] epath)
 	{
 		if (dir.isDirectory()) {
 			//System.out.println(dir);
@@ -283,7 +290,7 @@ public class music
 	 *
 	 *   ~~ Needs to be rewritten and parameterised with updateArtist ~~
 	 */
-	private void updateAlbum(File dir, String[] epath, String parent)
+	protected void updateAlbum(File dir, String[] epath, String parent)
 	{
 		if (dir.isDirectory()) {
 			//System.out.println(dir);
@@ -325,7 +332,7 @@ public class music
 	/**
 	 *   Adds a music combinattion (album/artist/format/misc) to the table "music".
 	 */
-	private void makeMusicCombo(int album, int artist, int format, int misc)
+	protected void makeMusicCombo(int album, int artist, int format, int misc)
 	{
 		kerpowObjectManager.runDB.sqlRun("insert into music(artist, album, format, misc) values(" + artist + ", " + album + ", " + format + ", " + misc + ")","Failed to make music combo: ");
 	}
@@ -333,7 +340,7 @@ public class music
 	/**
 	 *   Checks if an artist exists in the table "artist".  Returns the artist ID or -1 if it doesn't exist.
 	 */
-	private int checkArtist(String artistInfo)
+	protected int checkArtist(String artistInfo)
 	{
 		String artist = artistInfo.replaceAll("'","''");
 		//System.out.println(artist);
@@ -362,7 +369,7 @@ public class music
 	/**
 	 *   Checks if an album exists in the table "album".  Returns the album ID or -1 if it doesn't exist.
 	 */
-	private int checkAlbum(String albumInfo)
+	protected int checkAlbum(String albumInfo)
 	{
 		String album = albumInfo.replaceAll("'","''");
 		//System.out.println(album);
@@ -381,7 +388,7 @@ public class music
 	/**
 	 *   Checks a music combination (album/artist) from the table "music".
 	 */
-	private int checkMusic(int album, int artist)
+	protected int checkMusic(int album, int artist)
 	{
 		int result = -1;
 		try
@@ -395,7 +402,7 @@ public class music
 		return result;
 	}
 	
-	private int checkFormat(String formatInfo)
+	protected int checkFormat(String formatInfo)
 	{
 		String format = formatInfo.replaceAll("'","''");
 		//System.out.println(album);
@@ -411,137 +418,4 @@ public class music
 		return result;
 	
 	}
-	
-	/**
-	 *   Stores the column widths supplied in columnWidths.
-	 */
-	public void setColumns(int[] columns)
-	{
-		columnWidths = columns;
-	}
-	
-	/**
-	 *   Sets the verbosityLevel.  Deprecated in favour of public verbosityLevel in kerpowObjectManager.java
-	 */
-	public void setVerbosity(int level)
-	{
-		verbosityLevel = level;
-	}
-	
-	public void parseCommand(String[] command)
-	{
-		if (command[0].equals("display") && command.length > 1) {
-			if (command[1].equals("all")) {
-				showDB(); 
-			} else {
-				if (command[1].equals("artist") | command[1].equals("album") | command[1].equals("format") | command[1].equals("alias")) {
-					String[] mycomm = buildCommands(command);
-					searchDB(mycomm[1],mycomm[2]);
-				} else {
-					System.out.println("Not a recognised command. Type \"help music\" to view available commands.");
-				}
-			}
-		}
-		else if (command[0].equals("update")) {
-			updateDB(kerpowObjectManager.preferences.getMusicPath(),kerpowObjectManager.preferences.getExcludePath());
-		}
-		else if (command[0].equals("edit") && command.length > 1) {
-			if (command[1].equals("artist") | command[1].equals("album") | command[1].equals("format") | command[1].equals("alias")) {
-				String[] mycomm = buildCommands(command);
-				editRecord(mycomm[1],mycomm[2],mycomm[3]);
-
-				/*
-				for (int i = 0; i < mycomm.length; i++)
-				{
-					System.out.println("\"" + mycomm[i] + "\"");
-				}*/
-			} else if (command[1].equals("music"))
-			{
-				String[] mycomm = buildCommands(command);
-				editMusic(mycomm[2],mycomm[3],mycomm[4],mycomm[5],mycomm[6]);
-			} else {
-				System.out.println("Not a recognised command. Type \"help music\" to view available commands.");
-				System.out.println("Expected 'artist', 'album', 'format' or 'music'.");
-			}
-		}
-		else if (command[0].equals("add") && command.length > 1) {
-			if (command[1].equals("artist") | command[1].equals("album") | command[1].equals("format") | command[1].equals("alias")) {
-				String[] mycomm = buildCommands(command);
-				addRecord(mycomm[1],mycomm[2]);
-			} else if (command[1].equals("music")) {
-				String[] mycomm = buildCommands(command);
-				addMusic(mycomm[2],mycomm[3],mycomm[4],mycomm[5]);
-			} else {
-				System.out.println("Not a recognised command. Type \"help music\" to view available commands.");
-				System.out.println("Expected 'artist', 'album', 'format' or 'music'.");
-			}
-		}
-		else if (command[0].equals("exit")) {
-			System.out.println("Farewell!");			
-		} else {
-			help();
-		}
-	}
-	
-	private String[] buildCommands(String[] command)
-	{
-		boolean longB = true;
-		String sOut = "";
-		String sTmp = "";
-		String[] fixxed = new String[6];
-		int fixCount = 0;
-		
-		//fixxed[fixCount] = "";
-
-		for (int i = 0; i < command.length; i++) 
-		{
-			sOut = command[i];
-
-			if (sOut.endsWith("\""))
-			{
-				sTmp+=sOut.substring(0,sOut.length()-1);
-				longB = true;
-				sOut = sTmp;
-			} else {
-				sTmp+=sOut + " ";
-			}
-
-			if (sOut.startsWith("\""))
-			{
-				sTmp = sOut.substring(1) + " ";
-				longB = false;
-			}
-
-			if (longB)
-			{
-				//System.out.println("\"" + sOut + "\"");
-				fixxed[fixCount] = sOut;
-				fixCount++;
-				
-			}
-			//System.out.println(sOut);
-		}
-		
-		return fixxed;
-	}
-
-	
-	public void help()
-	{
-		String msg="";
-		
-		msg+="Music archive commands:\n\n";
-		
-		msg+="  display	all\n";
-		msg+="		artist <artist name | artistID>\n";
-		msg+="		album <album name | albumID>\n";
-		msg+="		format <format type | formatID>\n";
-		msg+="		alias <alias name | aliasID>\n\n";
-		msg+="  update	updates the archive from your local music directories.\n\n";
-		msg+="  add		music <artist> <album> <format> <misc>\n\n";
-		msg+="  home		return home\n\n";
-
-		System.out.println(msg);
-	}
-
 }

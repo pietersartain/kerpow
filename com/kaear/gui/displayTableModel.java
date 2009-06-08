@@ -1,12 +1,17 @@
+package com.kaear.gui;
+
+import com.kaear.common.*;
+import com.kaear.cli.*;
+
 import javax.swing.*;
 import javax.swing.table.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class MyTableModel extends AbstractTableModel {
+public class displayTableModel extends AbstractTableModel {
 	
-	    private boolean DEBUG = false;
+	    private boolean DEBUG = true;
 		private Vector data;
         private String[] columnNames;
 		
@@ -25,7 +30,7 @@ public class MyTableModel extends AbstractTableModel {
         };
 		*/
 		
-		public MyTableModel(dataList buildList)
+		public displayTableModel(dataList buildList)
 		{
 		//Pull in the information for whatever module is required.
 		columnNames = buildList.getColumnHeaders();
@@ -74,7 +79,7 @@ public class MyTableModel extends AbstractTableModel {
                 return true;
             }
 			*/
-			return false;
+			return true;
         }
 		
 		/*
@@ -90,7 +95,18 @@ public class MyTableModel extends AbstractTableModel {
             }
 
             //data[row][col] = value;
-			data.setElementAt(value,row);
+			
+			String[] myStrData = (String[])data.elementAt(row);
+			
+			for (int x=0; x < myStrData.length; x++)
+			{
+				if (x == col)
+				{
+					myStrData[x] = (String)value;
+				}
+			}
+			
+			data.setElementAt(myStrData,row);
             fireTableCellUpdated(row, col);
 
             if (DEBUG) {

@@ -1,3 +1,8 @@
+package com.kaear.gui;
+
+import com.kaear.common.*;
+import com.kaear.cli.*;
+
 import javax.swing.*;
 import javax.swing.table.*;
 import javax.swing.border.*;
@@ -5,21 +10,22 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class kerpowgui implements ActionListener {
+public class kerpowgui implements ActionListener 
+{
 
     final static String LOOKANDFEEL = "GTK+";
 	public static kerpowObjectManager kerpowObjectManager;
-	public MyTableModel tableModel;
+	public displayTableModel tableModel;
 	public JTable table;
-	public JLabel statusBar = new JLabel();
+	public static JLabel statusBar = new JLabel();
+	public static JFrame frame = new JFrame("kerpow!");
 	
 	public kerpowgui() {
-	kerpowObjectManager = new kerpowObjectManager();
+		kerpowObjectManager = new kerpowObjectManager();
 	}
 
 
 	public Component createComponents() {
-	
 		JPanel masterPane = new JPanel();
 		//JFrame masterPane = new JFrame();
 		masterPane.setLayout(new BoxLayout(masterPane,BoxLayout.PAGE_AXIS));
@@ -27,24 +33,19 @@ public class kerpowgui implements ActionListener {
 		// Add the menu
 		masterPane.add(makeMenu());
 
-		// Add the toolbar
-		//masterPane.add(makeToolbar());
-
 		// Add the tabbed pane
 		masterPane.add(makeTabbedpane());
-		
+
+		// Add the status bar
 		masterPane.add(makeStatusbar());
 		
 		// Set preferred size
-		masterPane.setPreferredSize(new Dimension(600,400));
+		masterPane.setPreferredSize(new Dimension(800,600));
 
 		return masterPane;
-// ************** Done! *****************		
-}
-
+	}
 
 // ************** JMenu *****************
-
 protected JComponent makeMenu()
 {		
         JMenu fileMenu = new JMenu ("File");
@@ -70,137 +71,18 @@ protected JComponent makeMenu()
 		return menuBar;
 }
 
-// ************** JToolbar *****************
-protected JComponent makeToolbar()
-{
-		JToolBar toolBar = new JToolBar();
-		
-		JButton refreshButton = new JButton(new ImageIcon("res/gtk-refresh.png"));
-		refreshButton.setMinimumSize(new Dimension(24,24));
-		refreshButton.setPreferredSize(new Dimension(30,30));
-		refreshButton.setMaximumSize(new Dimension(30,30));
-		refreshButton.addActionListener(this);
-		refreshButton.setActionCommand("REFRESH_MUSIC");
-		
-		JButton updateButton = new JButton(new ImageIcon("res/gtk-refresh.png"));
-		updateButton.setMinimumSize(new Dimension(24,24));
-		updateButton.setPreferredSize(new Dimension(30,30));
-		updateButton.setMaximumSize(new Dimension(30,30));
-		updateButton.addActionListener(this);
-		updateButton.setActionCommand("UPDATE_MUSIC");
-
-		toolBar.add(refreshButton);
-		toolBar.add(updateButton);
-		toolBar.setFloatable(false);		
-
-		toolBar.setMinimumSize(new Dimension(100000,30));
-		toolBar.setPreferredSize(new Dimension(100000,30));
-		toolBar.setMaximumSize(new Dimension(Short.MAX_VALUE,30));
-		
-		return toolBar;
-}
-
 
 // ******* This makes stuff happen on button clicks *********
-
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         String description = null;
 
         // Handle each button.
         if ("REFRESH_MUSIC".equals(cmd)) { //first button clicked
-			kerpowObjectManager.music.updateDB(kerpowObjectManager.preferences.getMusicPath(),kerpowObjectManager.preferences.getExcludePath());
-        } else if ("UPDATE_MUSIC".equals(cmd)) { // second button clicked
-            updateTable();
+		} else if ("UPDATE_MUSIC".equals(cmd)) { // second button clicked
         } 
-		/*
-		else if (NEXT.equals(cmd)) { // third button clicked
-            description = "taken you to the next <something>.";
-        }
-
-        displayResult("If this were a real app, it would have "
-                        + description);
-					*/
-					
-		kerpowObjectManager.runDB.dbCommit();
-		updateTable();
     }
 
-// ************** This refreshes the table contents *****************
-
-	public void updateTable() {
-//		System.out.println("Updating table ... ");
-//		tableModel.fireTableStructureChanged();
-		
-//		DefaultTableModel model = (DefaultTableModel)tableModel.getModel();
-		//tableModel.fireTableDataChanged();
-
-		//tableModel = new MyTableModel(new musicList());
-		//JTable table = new JTable(tableModel);
-		//table = new JTable(tableModel);
-		table.setModel(new MyTableModel(new musicList()));
-
-	}
-
-// ************** This is a filler *****************
-
-		//masterPane.add(Box.createRigidArea(new Dimension(0,50)));
-
-// ************** JSplitPane *****************
-protected JComponent makeSplitpane()
-{
-		// Left hand side
-		JPanel pane = new JPanel();
-		pane.setLayout(new BoxLayout(pane,BoxLayout.PAGE_AXIS));
-
-//		JLabel label = new JLabel("\'Sup ma bitches!");
-//		pane.add(label);
-
-		JButton refreshButton = new JButton("Update ...",new ImageIcon("res/gtk-refresh.png"));
-		refreshButton.setMinimumSize(new Dimension(120,30));
-		refreshButton.setPreferredSize(new Dimension(120,30));
-		refreshButton.setMaximumSize(new Dimension(120,30));
-		refreshButton.addActionListener(this);
-		refreshButton.setActionCommand("REFRESH_MUSIC");
-
-		JButton refreshButton1 = new JButton("Update ...",new ImageIcon("res/gtk-refresh.png"));
-		refreshButton1.setMinimumSize(new Dimension(120,30));
-		refreshButton1.setPreferredSize(new Dimension(120,30));
-		refreshButton1.setMaximumSize(new Dimension(120,30));
-		refreshButton1.addActionListener(this);
-		refreshButton1.setActionCommand("UPDATE_MUSIC");
-
-		pane.add(refreshButton);
-		pane.add(refreshButton1);
-
-		
-		pane.setBorder(BorderFactory.createEmptyBorder(
-                                        5, //top
-                                        5, //left
-                                        5, //bottom
-                                        5) //right
-                                        );
-
-
-		// Right hand side
-		JPanel pane1 = new JPanel(new GridLayout(0,1));
-//        tableModel = new MyTableModel(new musicList());
-		tableModel = new MyTableModel(new musicList());
-		//tableModel.addTableModelListener(
-		//System.out.println(tableModel.getTableModelListeners());
-		table = new JTable(tableModel);
-        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
-
-        //Create the scroll pane and add the table to it.
-        JScrollPane scrollPane = new JScrollPane(table);
-
-        //Add the scroll pane to this panel.
-        pane1.add(scrollPane);
- 
-
-		JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,pane, pane1);
-		return splitPane;
-}
 
 // ************** StatusBar *****************	
 protected JComponent makeStatusbar()
@@ -213,10 +95,11 @@ protected JComponent makeStatusbar()
 		statusBar.setAlignmentX(Component.CENTER_ALIGNMENT);
 		
 		statusBar.setHorizontalAlignment(SwingConstants.LEFT);
-		statusBar.setOpaque(true);
-		statusBar.setBackground(Color.WHITE);
+		statusBar.setOpaque(false);
+		//statusBar.setBackground(Color.WHITE);
 		statusBar.setBorder(new BevelBorder(BevelBorder.LOWERED));
-		statusBar.setText("Stuff going on ...");
+		//statusBar.setText(" kerpow initialised.");
+		updateStatusBar("kerpow initialised.");
 		
 		return statusBar;
 }
@@ -227,10 +110,19 @@ protected JComponent makeTabbedpane()
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.setOpaque(true);
 
-        tabbedPane.addTab("Tab 1", null, makeSplitpane(),
-                          "Does nothing");
-        tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
+	for (int x=0; x<kerpowObjectManager.plugins.getPlugins().size(); x++)
+	{
+		plugin myPlugin = (plugin)kerpowObjectManager.plugins.getPlugins().get(x);
+   		//tabbedPane.addTab(myPlugin.getPluginName(), null, myPlugin.getGui().makeGui(), "Does nothing");
 
+		String myString = "";
+		
+		try { myString = myPlugin.getPluginName(); }
+		catch (Throwable e) { System.out.println("Oh bugger:  " + e); }
+
+		tabbedPane.addTab(myPlugin.getPluginName(), null, myPlugin.getGui().makeGui(), "Does nothing");
+	}
+        
         JComponent panel2 = makeTextPanel("Panel #2");
         tabbedPane.addTab("Tab 2", null, panel2,
                           "Does twice as much nothing");
@@ -241,7 +133,6 @@ protected JComponent makeTabbedpane()
                           "Still does nothing");
         tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
 	
-        //Uncomment the following line to use scrolling tabs.
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		
 		return tabbedPane;
@@ -270,7 +161,6 @@ protected JComponent makeTabbedpane()
         JFrame.setDefaultLookAndFeelDecorated(true);
 
         //Create and set up the window.
-        JFrame frame = new JFrame("kerpow!");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
         kerpowgui app = new kerpowgui();
@@ -278,7 +168,6 @@ protected JComponent makeTabbedpane()
 		// Build the gui:
 		Component contents = app.createComponents();
 		
-		//frame.setLayout(new BoxLayout(frame,BoxLayout.PAGE_AXIS));
         frame.getContentPane().add(contents, BorderLayout.CENTER);
 
         //Display the window.
@@ -326,6 +215,12 @@ protected JComponent makeTabbedpane()
    		}
 	}
 	
+	public static void updateStatusBar(String s)
+	{
+		statusBar.setText(new Date().toString() + ": " + s);
+		statusBar.repaint();
+	}
+	
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
@@ -336,4 +231,5 @@ protected JComponent makeTabbedpane()
             }
         });
     }
+	
 }
