@@ -1,3 +1,23 @@
+/*
+ * Created by:  Pieter Sartain
+ *
+ * Licensed under the GPL:
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ * 
+ *
+ */
+
 package com.kaear.gui;
 
 import com.kaear.interfaces.*;
@@ -22,9 +42,10 @@ public class kerpowgui implements ActionListener
 	public static int infoBarStatus = 0;
 	public static JFrame frame = new JFrame("kerpow!");
 	private static JToggleButton toggleList;
+	private String whichDB = "local";
 	
 	public kerpowgui() {
-		kerpowObjectManager = new kerpowObjectManager();
+		kerpowObjectManager = new kerpowObjectManager(whichDB);
 	}
 
 
@@ -34,7 +55,7 @@ public class kerpowgui implements ActionListener
 		masterPane.setLayout(new BoxLayout(masterPane,BoxLayout.PAGE_AXIS));
 		
 		// Add the menu
-		//masterPane.add(makeMenu());
+		masterPane.add(makeMenu());
 
 		// Add the tabbed pane
 		masterPane.add(makeTabbedpane());
@@ -54,21 +75,26 @@ public class kerpowgui implements ActionListener
 // ************** JMenu *****************
 	protected JComponent makeMenu()
 	{		
-        	JMenu fileMenu = new JMenu ("File");
-        		JMenuItem printItem = new JMenuItem ("Print");
-        		fileMenu.add (printItem);
-        		JMenuItem exitItem = new JMenuItem ("Exit");
-        		fileMenu.add (exitItem);
+        	JMenu connMen = new JMenu ("Connection");
+        		JMenuItem local = new JMenuItem ("Local");
+        		local.addActionListener(this);
+				local.setActionCommand("LOCAL");
+				connMen.add(local);
+				JMenuItem remote = new JMenuItem ("Remote");
+        		connMen.add(remote);
+				remote.setActionCommand("REMOTE");
+				remote.addActionListener(this);
 
-        	JMenu helpMenu = new JMenu ("Help");
+        	/*
+			JMenu helpMenu = new JMenu ("Help");
         		JMenuItem contentsItem = new JMenuItem ("Contents");
         		helpMenu.add (contentsItem);
         		JMenuItem aboutItem = new JMenuItem ("About");
         		helpMenu.add (aboutItem);
+			*/
 
 			JMenuBar menuBar = new JMenuBar();
-			menuBar.add(fileMenu);
-			menuBar.add(helpMenu);
+			menuBar.add(connMen);
 
 			menuBar.setMinimumSize(new Dimension(100000,25));
 			menuBar.setPreferredSize(new Dimension(100000,25));
@@ -81,11 +107,14 @@ public class kerpowgui implements ActionListener
 // ******* This makes stuff happen on button clicks *********
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
-        String description = null;
 
         // Handle each button.
-        if ("REFRESH_MUSIC".equals(cmd)) { //first button clicked
-		} else if ("UPDATE_MUSIC".equals(cmd)) { // second button clicked
+        if ("LOCAL".equals(cmd)) {
+			//kerpowgui.updateStatusBar("Using local database.");
+			whichDB = "local";
+		} else if ("REMOTE".equals(cmd)) {
+			//kerpowgui.updateStatusBar("Using remote database.");
+			whichDB = "remote";
         } 
     }
 

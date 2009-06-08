@@ -1,6 +1,1 @@
-----------------------------------------------------------------
-2005-10-01 14:49:51.756 GMT:
- Booting Derby version IBM Corp. - Apache Derby - 10.0.2.0 - (30301): instance c013800d-0106-aca9-0d4d-0000002a99f0
-on database directory /home/administrator/docs/javasrc/kerpow-development/7-cleangui/kerpowDB 
-
-Database Class Loader started - derby.database.classpath=''
+Server is ready to accept connections on port 2323.

@@ -1,4 +1,4 @@
-export CLASSPATH="build/res/derby.jar:build/res/derbytools.jar:ui/:lists/:${CLASSPATH}"
+export CLASSPATH="build/res/derby.jar:build/res/derbyclient.jar:build/res/derbynet.jar:build/res/derbytools.jar:${CLASSPATH}"
 
 if [ "$2" = "--verbose" ]; then
 	echo "Exporting classpath ..."
