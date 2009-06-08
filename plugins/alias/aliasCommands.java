@@ -1,4 +1,4 @@
-package plugins.music;
+package plugins.alias;
 
 import com.kaear.cli.*;
 import com.kaear.common.*;
@@ -12,7 +12,7 @@ import java.io.File;
 import java.util.Vector;
 import java.util.Date;
 
-public class musicCommands implements Runnable
+public class aliasCommands implements Runnable
 {
 
 	private int verbosityLevel = 0;
@@ -20,7 +20,7 @@ public class musicCommands implements Runnable
 	private String cmd;
 	private Vector args;
 
-	public musicCommands(String cmd, Vector args)
+	public aliasCommands(String cmd, Vector args)
 	{
 		verbosityLevel = musicMain.verbosityLevel;
 		this.args = new Vector();

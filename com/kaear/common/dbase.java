@@ -29,7 +29,6 @@ public class dbase
 
 	public dbase()
 	{
-	
 		verbosityLevel = kerpowObjectManager.verbosityLevel;
     	System.out.println("Initialising the database ...");
 
@@ -115,6 +114,7 @@ public class dbase
 	public boolean sqlRun(String sqlstmt, String error)
 	{
 		try {
+			//System.out.println("Now executing ..." + sqlstmt);
 			s.execute(sqlstmt);
 			dbCommit();
 			return true;

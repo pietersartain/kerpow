@@ -44,13 +44,15 @@ public class pluginManager
 				
 				if (new File(dir, children[i]).isFile())
 				{
-				
-					int linelen = children[i].toString().indexOf(".");
-					String tempPlugin = children[i].toString().substring(0,linelen);
-					//System.out.println(tempPlugin);
-				
-					// Probably a plugin, add it to the list.
-					pluginList.add(0,"plugins." + tempPlugin + "." + tempPlugin + "Main");
+
+					if (children[i].toString().endsWith(".jar"))
+					{
+						int linelen = children[i].toString().indexOf(".");
+						String tempPlugin = children[i].toString().substring(0,linelen);
+
+						// Probably a plugin, add it to the list.
+						pluginList.add(0,"plugins." + tempPlugin + "." + tempPlugin + "Main");
+					}
 				}
 			}
 		}

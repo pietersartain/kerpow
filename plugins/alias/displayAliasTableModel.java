@@ -1,7 +1,8 @@
-package com.kaear.gui;
+package plugins.alias;
 
 import com.kaear.common.*;
 import com.kaear.cli.*;
+import com.kaear.gui.*;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -9,32 +10,23 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
-public class displayTableModel extends AbstractTableModel {
+public class displayAliasTableModel extends AbstractTableModel {
 	
-	    private boolean DEBUG = true;
-		private Vector data;
+	    private boolean DEBUG = false;
+		private static Vector data;
         private String[] columnNames;
 		
-		/*
-        private Object[][] data = {
-            {"Mary", "Campione",
-             "Snowboarding", new Integer(5), new Boolean(false)},
-            {"Alison", "Huml",
-             "Rowing", new Integer(3), new Boolean(true)},
-            {"Kathy", "Walrath",
-             "Knitting", new Integer(2), new Boolean(false)},
-            {"Sharon", "Zakhour",
-             "Speed reading", new Integer(20), new Boolean(true)},
-            {"Philip", "Milne",
-             "Pool", new Integer(10), new Boolean(false)}
-        };
-		*/
-		
-		public displayTableModel(dataList buildList)
+		public displayAliasTableModel(dataList buildList)
 		{
-		//Pull in the information for whatever module is required.
-		columnNames = buildList.getColumnHeaders();
-		data = buildList.makeList();
+			//Pull in the information for whatever module is required.
+			columnNames = buildList.getColumnHeaders();
+			data = buildList.makeList();
+		}
+		
+		public void setData(dataList buildList)
+		{
+			data = buildList.makeList();
+			fireTableDataChanged();
 		}
 		
 	    public int getColumnCount() {
@@ -72,14 +64,11 @@ public class displayTableModel extends AbstractTableModel {
         public boolean isCellEditable(int row, int col) {
             //Note that the data/cell address is constant,
             //no matter where the cell appears onscreen.
-            /*
-			if (col < 2) {
+			if (col == 0) {
                 return false;
             } else {
                 return true;
             }
-			*/
-			return true;
         }
 		
 		/*
@@ -107,13 +96,85 @@ public class displayTableModel extends AbstractTableModel {
 			}
 			
 			data.setElementAt(myStrData,row);
+			
+			// Updates the actual view of the JTable
             fireTableCellUpdated(row, col);
+			
+			// Given a name, fetch the ID
+			String newVal = getAnID((String)value,col);
+			
+			if (newVal.equals("-1")) {
+				newVal = (String)value;
+			}
+			
+			// Updates the database to match
+			kerpowObjectManager.runDB.sqlRun("UPDATE music SET " + getName(col) + " = " + newVal + " WHERE id = " + myStrData[0],"Table edit failed: ");
 
             if (DEBUG) {
                 System.out.println("New value of data:");
                 printDebugData();
             }
         }
+		
+		public void deleteRow(int row)
+		{
+			Vector args = new Vector();
+			args.add(0,getValueAt(row,0));
+			
+			data.remove(row);
+			fireTableRowsDeleted(row,row);
+	
+			new musicCommands("deleteMusic",args);
+		}
+		
+		private String getAnID(String value, int s)
+		{
+			/**
+			 * Columns:
+			 *
+			 * 0 = ID
+			 * 1 = Artist
+			 * 2 = Album
+			 * 3 = Format
+			 * 4 = Misc
+			 */
+			musicCommands mc = new musicCommands(null,null);
+			
+			if (s == 1) { return String.valueOf(mc.checkArtist(value)); }
+			else
+			if (s == 2) { return String.valueOf(mc.checkAlbum(value)); }
+			else
+			if (s == 3) { return String.valueOf(mc.checkFormat(value)); }
+			else
+			if (s == 4) { return "-1"; }
+			else
+			{ return ""; }
+		}
+		
+		private String getName(int s)
+		{
+			/**
+			 * Columns:
+			 *
+			 * 0 = ID
+			 * 1 = Artist
+			 * 2 = Album
+			 * 3 = Format
+			 * 4 = Misc
+			 */
+
+			if (s == 0) { return "id"; }
+			else
+			if (s == 1) { return "artist"; }
+			else
+			if (s == 2) { return "album"; }
+			else
+			if (s == 3) { return "format"; }
+			else
+			if (s == 4) { return "misc"; }
+			else
+			{ return ""; }
+		}
 
         private void printDebugData() {
             int numRows = getRowCount();
@@ -128,4 +189,5 @@ public class displayTableModel extends AbstractTableModel {
             }
             System.out.println("--------------------------");
         }
+	
 }

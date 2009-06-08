@@ -18,9 +18,8 @@ import java.util.Properties;
 import java.util.Vector;
 import java.io.File;
 import java.lang.Process;
-import java.sql.ResultSet;
 
-public class musicGui implements guiPlugin, ActionListener
+public class aliasGui implements guiPlugin, ActionListener
 {
 
 	private int verbosityLevel = 0;
@@ -28,10 +27,10 @@ public class musicGui implements guiPlugin, ActionListener
 	private int addalias = 0;
 	private String searchBox = "Artist";
 	private JTextField textField;
-	public displayMusicTableModel tableModel;
+	public displayTableModel tableModel;
 	public JTable table;
 
-	public musicGui()
+	public aliasGui()
 	{
 		verbosityLevel = musicMain.verbosityLevel;
 	}
@@ -62,9 +61,13 @@ public class musicGui implements guiPlugin, ActionListener
 		pane.add(buildSideButton("Update","gtk-refresh","UPDATE_MUSIC"));
 
 		pane.add(buildSeparator());
-
-		pane.add(buildSideButton("Delete","gtk-delete","DELETE_MUSIC"));
 		
+		pane.add(buildSideButton("Show aliases","xfce4-menueditor","SHOW_ALIAS"));
+		pane.add(buildSideButton("Add alias","xfce4-menueditor","ADD_ALIAS"));
+
+		pane.add(buildSeparator());
+		
+
 		pane.setBorder(BorderFactory.createEmptyBorder(
                                         5, //top
                                         5, //left
@@ -75,21 +78,12 @@ public class musicGui implements guiPlugin, ActionListener
 
 		// Right hand side
 		JPanel pane1 = new JPanel(new GridLayout(0,1));
-		tableModel = new displayMusicTableModel(new musicList(new musicCommands(null,null).showDB()));
+		tableModel = new displayTableModel(new musicList(new musicCommands(null,null).showDB()));
 		table = new JTable(tableModel);
-		table.setPreferredScrollableViewportSize(new Dimension(700, 70));
+        table.setPreferredScrollableViewportSize(new Dimension(700, 70));
 
         //Create the scroll pane and add the table to it.
         JScrollPane scrollPane = new JScrollPane(table);
-
-		// Mess with the artist edit column
-		setUpArtistList(table, table.getColumnModel().getColumn(1));
-
-		// Mess with the album edit column
-		setUpAlbumList(table, table.getColumnModel().getColumn(2));
-
-		// Mess with the format edit column
-		setUpFormatList(table, table.getColumnModel().getColumn(3));
 
         //Add the scroll pane to this panel.
         pane1.add(scrollPane);
@@ -166,58 +160,7 @@ public class musicGui implements guiPlugin, ActionListener
 		toggleButton.setActionCommand(action);
 		return toggleButton;
 	}
-
-	public void setUpArtistList(JTable table, TableColumn artistColumn) 
-	{
-    	//Set up the editor for the artist list.
-    	JComboBox comboBox = new JComboBox();
-
-		try {
-			ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT * FROM artist ORDER BY name ASC","Artist listing failed: ");
-			while (!rs.isLast())
-			{
-				rs.next();
-				comboBox.addItem(rs.getString(2));
-			}
-		} catch (Throwable e) { new exhandle("musicGui.setUpArtistList() failed with: ", e, verbosityLevel); }
-
-    	artistColumn.setCellEditor(new DefaultCellEditor(comboBox));
-	}
-
-	public void setUpAlbumList(JTable table, TableColumn artistColumn) 
-	{
-    	//Set up the editor for the artist list.
-    	JComboBox comboBox = new JComboBox();
-
-		try {
-			ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT * FROM album ORDER BY name ASC","Album listing failed: ");
-			while (!rs.isLast())
-			{
-				rs.next();
-				comboBox.addItem(rs.getString(2));
-			}
-		} catch (Throwable e) { new exhandle("musicGui.setUpAlbumList() failed with: ", e, verbosityLevel); }
-
-    	artistColumn.setCellEditor(new DefaultCellEditor(comboBox));
-	}
-
-	public void setUpFormatList(JTable table, TableColumn artistColumn) 
-	{
-    	//Set up the editor for the artist list.
-    	JComboBox comboBox = new JComboBox();
-
-		try {
-			ResultSet rs = kerpowObjectManager.runDB.sqlExe("SELECT * FROM format ORDER BY name ASC","Format listing failed: ");
-			while (!rs.isLast())
-			{
-				rs.next();
-				comboBox.addItem(rs.getString(2));
-			}
-		} catch (Throwable e) { new exhandle("musicGui.setUpFormatList() failed with: ", e, verbosityLevel); }
-
-    	artistColumn.setCellEditor(new DefaultCellEditor(comboBox));
-	}
-
+	
 // ******* This makes stuff happen on button clicks *********
     public void actionPerformed(ActionEvent e) 
 	{
@@ -269,23 +212,32 @@ public class musicGui implements guiPlugin, ActionListener
 				}
 			}
 		}
-		else if ("DELETE_MUSIC".equals(cmd)) 
+		else if ("ADD_ALIAS".equals(cmd)) 
 		{
-			tableModel.deleteRow(table.getSelectedRow());
+			if (addalias == 0)
+			{
+				//updateTable(new musicCommands(null,null).showDB());
+				addalias = 1;
+				kerpowgui.addInfoBar(new addGui().makeGui(),100);
+			} else {
+				addalias = 0;
+				kerpowgui.clearInfoBar();
+			}
 		}
+		else if ("SHOW_ALIAS".equals(cmd)) 
+		{
+	  		kerpowgui.updateStatusBar("Executing ...");
+			Vector args = new Vector();
+			args.add(0,"SELECT * FROM alias ORDER BY alias DESC");
+			new musicCommands("runSQL",args);
+		}
+		
     }
 
 // ************** This refreshes the table contents *****************
 	public void updateTable(String sqlstmt) {
-		tableModel.setData(new musicList(sqlstmt));
-
-		// Mess with the artist edit column
-		setUpArtistList(table, table.getColumnModel().getColumn(1));
-
-		// Mess with the album edit column
-		setUpAlbumList(table, table.getColumnModel().getColumn(2));
-
-		// Mess with the format edit column
-		setUpFormatList(table, table.getColumnModel().getColumn(3));
+		table.setModel(new displayTableModel(new musicList(sqlstmt)));
 	}
+
+
 }

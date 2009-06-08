@@ -18,7 +18,7 @@ private int[] columnWidths = new int[5];
 		// Parse music.prefs
 		try
 		{
-			FileReader prefsRead = new FileReader("plugins/music/music.prefs");
+			FileReader prefsRead = new FileReader("plugins/music.prefs");
 			// We won't parse a file over 1mb (1024*1024 B) in size.
 			char[] thePrefs = new char[1048576];
 

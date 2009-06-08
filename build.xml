@@ -3,30 +3,31 @@
 
 <project name="guisub" default="build" basedir=".">
 
-
-<!-- build common -->
-	<target name="common">
-		<javac srcdir="./com/kaear/common/" />
-	</target>
-
-<!-- build cli -->
-	<target name="cli" depends="common">
-		<javac srcdir="./com/kaear/cli/" />
-	</target>
-
-<!-- build gui -->
-	<target name="gui" depends="common">
-		<javac srcdir="./com/kaear/gui/" />
+<!-- build kerpow -->
+	<target name="kerpow">
+		<javac srcdir="./com/kaear/">
+		    <classpath path="./build/res/derby.jar:./build/res/derbytools.jar:${CLASSPATH}:./"/>
+		</javac>
 	</target>
 
 <!-- build plugins -->
-    <target name="plugins" depends="common">
-        <javac srcdir="./plugins/" />
+    <target name="plugins" depends="kerpow">
+        <javac srcdir="./plugins/">
+		    <classpath path="./build/res/derby.jar:./build/res/derbytools.jar:${CLASSPATH}:./"/>
+		</javac>
     </target>
 
-
 <!-- build all -->
-	<target name="build" depends="common,gui,plugins">
+	<target name="build" depends="plugins">
 	</target>
+
+<!-- jar kerpow -->
+	<jar destfile="${dist}/lib/kerpow.jar"
+       basedir="${build}/classes"
+       includes="mypackage/test/**"
+       excludes="**/Test.class"
+  	/>
+
+
 	
 </project>

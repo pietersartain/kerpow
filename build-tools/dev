@@ -17,23 +17,28 @@ if [ ! "$2" = "--no-compile" ]; then
 	echo "Compiling .java files ..."
 	echo ""
 	runme=FALSE
-	javac "$1".java
+	javac plugins/*/*.java && \
+	javac com/kaear/*/*.java
 	if [ $? = "0" ]; then
 		runme=TRUE
 	fi
 fi
 
+if [ $runme == "TRUE" ]; then
+
 if [ "$2" = "--make-package" ]; then
+
 	cd ./build
 
-echo "Cleaning build area ..."
+	echo "Cleaning build area ..."
 #	rm kerpow.tar.bz2
 #	rm kerpow.tar
 #	rm ./*.class
 	rm *.jar
 	rm *.tar
 	rm *.tar.bz2
-	rm ./kerpow/* -dr
+	rm kerpow/ -dr
+	mkdir kerpow
 
 echo "Building kerpow.jar ..."
 	cp -a ../com kerpow/
@@ -45,19 +50,31 @@ echo "Building kerpow.jar ..."
 	cd ../
 
 echo "Preparing the package directory ..."
-	cp ./res/* ./kerpow/
+	cp ./res/*.jar ./kerpow/
+	cp ./res/kerpow.* ./kerpow/
 	cp ../kerpow.prefs ./kerpow/
 	mkdir kerpow/plugins/
+	cp ../plugins/music.prefs kerpow/plugins/
 
 echo "Building music.jar ..."
 	cp -a ../plugins/music kerpow/plugins/
 #	rm `find -name \*.java`
 	find -name \*.java
 	cd kerpow/
-	jar cmf ../res/music-manifest.txt music.jar plugins/music/
+	jar cmf ../res/plugins-manifest.txt music.jar plugins/music/
 	mv music.jar plugins/
 	cd ../
 	rm kerpow/plugins/music/ -dr
+	
+#echo "Building alias.jar ..."
+#	cp -a ../plugins/alias kerpow/plugins/
+##	rm `find -name \*.java`
+#	find -name \*.java
+#	cd kerpow/
+#	jar cmf ../res/plugins-manifest.txt alias.jar plugins/alias/
+#	mv alias.jar plugins/
+#	cd ../
+#	rm kerpow/plugins/music/ -dr
 
 echo "Building kerpow-all.tar.bz2 ..."
 	tar -cf kerpow-all.tar kerpow
@@ -65,7 +82,7 @@ echo "Building kerpow-all.tar.bz2 ..."
 
 else
 
-if [ $runme = "TRUE" ]; then
+#if [ $runme = "TRUE" ]; then
 
 	if [ ! "$1" = "" ]; then
 		echo "##############"

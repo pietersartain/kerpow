@@ -1,8 +1,8 @@
-package plugins.music;
+package plugins.alias;
 
 import com.kaear.common.*;
 
-public class musicMain implements plugin
+public class aliasMain implements plugin
 {
 
 	public static int verbosityLevel = 0;
@@ -10,7 +10,7 @@ public class musicMain implements plugin
 	private static guiPlugin Gui = new musicGui();
 	private static cliPlugin Txt = new musicText();
 	
-	public musicMain()
+	public aliasMain()
 	{
 		verbosityLevel = mp.getVerbosity();
 		

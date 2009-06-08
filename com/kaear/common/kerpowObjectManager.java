@@ -9,6 +9,7 @@ public class kerpowObjectManager {
 
 	// Objects
 	public static dbase runDB = new dbase();
+	private static initialiser ini = new initialiser();
 	public static preferences preferences = new preferences();
 	public static pluginManager plugins = new pluginManager();
 
@@ -17,26 +18,5 @@ public class kerpowObjectManager {
 
 	public kerpowObjectManager()
 	{
-		initialiser ini = new initialiser();
-
-		if (!ini.checkRun())
-		{
-			ini.firstRun();
-		}
-
-		//initmain();
-	}
-	
-	private void initmain()
-	{
-		// Preferences
-		preferences = new preferences();
-		verbosityLevel = preferences.getVerbosity();
-		
-		// DB
-		runDB = new dbase();
-		
-		// Plugins
-		plugins = new pluginManager();
 	}
 }

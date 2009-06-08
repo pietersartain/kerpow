@@ -9,15 +9,17 @@ import javax.swing.border.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.lang.reflect.Array;
 
 public class kerpowgui implements ActionListener 
 {
 
-    final static String LOOKANDFEEL = "GTK+";
+    private static String LOOKANDFEEL = "System";
 	public static kerpowObjectManager kerpowObjectManager;
-	public displayTableModel tableModel;
+//	public displayTableModel tableModel;
 	public JTable table;
 	public static JLabel statusBar = new JLabel();
+	public static JPanel infoBar = new JPanel();
 	public static JFrame frame = new JFrame("kerpow!");
 	
 	public kerpowgui() {
@@ -35,6 +37,9 @@ public class kerpowgui implements ActionListener
 
 		// Add the tabbed pane
 		masterPane.add(makeTabbedpane());
+
+		// Add the infobar
+		masterPane.add(makeInfoBar());
 
 		// Add the status bar
 		masterPane.add(makeStatusbar());
@@ -83,8 +88,27 @@ protected JComponent makeMenu()
         } 
     }
 
+// *************** InfoBar *******************
+protected JComponent makeInfoBar()
+{
+		infoBar.setPreferredSize(new Dimension(4500,0));
+		infoBar.setMinimumSize(new Dimension(4500,0));
+		infoBar.setMaximumSize(new Dimension(Short.MAX_VALUE,100));
+		infoBar.setSize(new Dimension(4500,0));
+		
+		//infoBar.setAlignmentX(Component.CENTER_ALIGNMENT);
+		
+		//infoBar.setHorizontalAlignment(SwingConstants.LEFT);
+		infoBar.setOpaque(true);
+		//statusBar.setBackground(Color.WHITE);
+		infoBar.setBorder(new BevelBorder(BevelBorder.LOWERED));
+		//statusBar.setText(" kerpow initialised.");
+		//updateStatusBar("kerpow initialised.");
+		
+		return infoBar;
+}
 
-// ************** StatusBar *****************	
+// ************** StatusBar *****************
 protected JComponent makeStatusbar()
 {
 		statusBar.setPreferredSize(new Dimension(4500,25));
@@ -104,7 +128,7 @@ protected JComponent makeStatusbar()
 		return statusBar;
 }
 
-// ************** JTabbedPane *****************	
+// ************** JTabbedPane *****************
 protected JComponent makeTabbedpane()
 {
 		JTabbedPane tabbedPane = new JTabbedPane();
@@ -122,6 +146,7 @@ protected JComponent makeTabbedpane()
 
 		tabbedPane.addTab(myPlugin.getPluginName(), null, myPlugin.getGui().makeGui(), "Does nothing");
 	}
+	/*
         
         JComponent panel2 = makeTextPanel("Panel #2");
         tabbedPane.addTab("Tab 2", null, panel2,
@@ -132,7 +157,7 @@ protected JComponent makeTabbedpane()
         tabbedPane.addTab("Tab 3", null, panel3,
                           "Still does nothing");
         tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
-	
+	*/
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		
 		return tabbedPane;
@@ -154,6 +179,18 @@ protected JComponent makeTabbedpane()
      * event-dispatching thread.
      */
     private static void createAndShowGUI() {
+ 
+ 		UIManager.LookAndFeelInfo[] lnfList = UIManager.getInstalledLookAndFeels();
+		//LOOKANDFEEL = UIManager.getSystemLookAndFeelClassName();
+		
+		for (int x=0; Array.getLength(lnfList) > x; x++)
+		{
+			LOOKANDFEEL = lnfList[x].getName();
+		}
+		
+		if (LOOKANDFEEL.equals("Windows Classic")) {
+			LOOKANDFEEL = "System";
+		}
         
 		initLookAndFeel();
         
@@ -217,10 +254,35 @@ protected JComponent makeTabbedpane()
 	
 	public static void updateStatusBar(String s)
 	{
-		statusBar.setText(new Date().toString() + ": " + s);
+		statusBar.setText(" " + new Date().toString() + ": " + s);
 		statusBar.repaint();
 	}
 	
+	private static void updateInfoBar(int s)
+	{
+		infoBar.setPreferredSize(new Dimension(4500,s));
+		infoBar.setMinimumSize(new Dimension(4500,s));
+		infoBar.setMaximumSize(new Dimension(Short.MAX_VALUE,s));
+		infoBar.setSize(new Dimension(4500,s));
+	}
+	
+	public static void addInfoBar(JComponent s, int a)
+	{
+		updateInfoBar(a);
+		infoBar.add(s);
+		
+		frame.pack();
+		infoBar.repaint();
+	}
+	
+	public static void clearInfoBar()
+	{
+		updateInfoBar(0);
+		infoBar.removeAll();
+		frame.pack();
+		infoBar.repaint();
+	}
+		
     public static void main(String[] args) {
         //Schedule a job for the event-dispatching thread:
         //creating and showing this application's GUI.
