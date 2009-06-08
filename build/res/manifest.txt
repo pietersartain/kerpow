@@ -1,0 +1,2 @@
+Main-Class: kerpow
+Class-Path: derbytools.jar derby.jar

@@ -1,0 +1,14 @@
+export CLASSPATH="/opt/Cloudscape10.0/lib/derby.jar:/opt/Cloudscape10.0/lib/derbytools.jar:${CLASSPATH}"
+
+rm ./*.class
+javac ./*.java
+
+echo "##############"
+echo "#  Running!  #"
+echo "##############"
+echo ""
+java kerpow "$@"
+echo ""
+echo "######################"
+echo "#  Program finished  #"
+echo "######################"
